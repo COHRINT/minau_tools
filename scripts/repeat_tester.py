@@ -44,6 +44,9 @@ class repeatTester:
 
         self.first_guppy = [5,0,-1]
         self.first_dory = [-5,0,-1]
+        self.red_vel = 0.5
+        self.blue_vel = 0.3
+        self.debug = rospy.get_param(~"debug")
 
         #extracts data and asigns it to variables
         self.config_names=[]
@@ -52,11 +55,14 @@ class repeatTester:
             self.config_names.append(self.config[i]['Test_Name'])
         self.test_group_name = self.config[0]['Test_Group_Name']
         self.num_groups = int(self.config[0]['Number_Tests_dep'])
+        self.mins_per_test = int(self.config[0]['Mins_Per_Test_dep'])
         self.num_configs = len(self.config)
         self.total_tests = self.num_groups*self.num_configs
+        self.remaining_time = self.mins_per_test*self.total_tests
         self.dim_x = float(self.config[0]['Map_Dim_x_dep'])
         self.dim_y = float(self.config[0]['Map_Dim_y_dep'])
-        self.generateWay()
+
+        self.first_red = [2*self.dim_x,2*self.dim_y,-1]
         self.printIntro()
         self.Done = False
 
@@ -75,61 +81,14 @@ class repeatTester:
         #prints initial information
         print('\n\nTest groups: '+str(self.num_groups))
         print('Total tests to execute: '+str(self.total_tests))
-        # print('Expected Duration: '+self.time()+'\n\n')
-    def waypoint(self):
-        """Generates random waypoint pairs so the red asset traverses the whole space
-
-        Returns:
-            [[x,y,z],[x,y,z]]: Pair of waypoints for red asset
-        """
-        #[1,2,3,4] --> [up,down,left,right]
-        dir = random.randint(1,4)
-        waypt = []
-        if dir == 1:
-            waypt.append([random.random()*2*self.dim_x-self.dim_x,random.random()*5+self.dim_y,-1])
-            waypt.append([random.random()*2*self.dim_x-self.dim_x,-(random.random()*5+self.dim_y),-1])
-            return waypt
-        if dir == 2:
-            waypt.append([random.random()*2*self.dim_x-self.dim_x,-(random.random()*5+self.dim_y),-1])
-            waypt.append([random.random()*2*self.dim_x-self.dim_x,(random.random()*5+self.dim_y),-1])
-            return waypt
-        if dir == 3:
-            waypt.append([-(random.random()*5+self.dim_x),random.random()*self.dim_y*2-self.dim_y,-1])
-            waypt.append([(random.random()*5+self.dim_x),(2*random.random()*self.dim_y-self.dim_y),-1])
-            return waypt
-        if dir == 4:
-            waypt.append([(random.random()*5+self.dim_x),random.random()*self.dim_y*2-self.dim_y,-1])
-            waypt.append([-(random.random()*5+self.dim_x),(2*random.random()*self.dim_y-self.dim_y),-1])
-            return waypt
-    def generateWay(self):
-        """
-        Generates the waypoints for the red asset and writes them to csv files.
-        """
-        #makes the waypoints into csv files that other scripts will be able to use
-        self.first_red = []
-        for i in range(self.num_groups):
-            waypoints = []
-            for j in range(25):
-                waypt = self.waypoint()
-                waypoints.append(waypt[0])
-                waypoints.append(waypt[1])
-            self.first_red.append(waypoints[0])
-            fileName = 'waypoints_'+str(i)+'.csv'
-            fileName = self.data_loc + '/waypoints/'+fileName
-            f = open(fileName,'w')
-            for j in range(50):
-                f.write(str(waypoints[j][0])+','+str(waypoints[j][1])+','+str(waypoints[j][2])+'\n')
-            f.close()
+        print('Expected Duration: '+self.time()+'\n\n')
     
-    def teleport(self, idx):
+    def teleport(self):
         """Teleports assets to starting positions
-
-        Args:
-            idx (group number): Changes which starting position the red asset will start at
         """
         set_model_state('guppy',self.first_guppy)
         set_model_state('dory',self.first_dory)
-        set_model_state('red_actor_5',self.first_red[idx])
+        set_model_state('red_actor_5',self.first_red)
 
     def run(self):
         """
@@ -142,59 +101,55 @@ class repeatTester:
         for j in range(self.num_configs):
             for i in range(self.num_groups):
                 print('\n\nExecuting '+self.test_group_name+'/'+self.config_names[j]+' #'+str(i+1)+' ('+str((i+1)+self.num_groups*j)+'/'+str(self.total_tests)+')\n\n')
-                self.teleport(i)
+                print('Time Remaining: '+ self.time())
+                self.remaining_time -= self.mins_per_test
+                self.teleport()
 
                 FNULL = open(os.devnull, 'w')
+                fileFor3 = self.data_loc+'/waypoints/'+'waypoints_'+str(i)+'.csv'
+                args3 = ['rosrun','minau_tools','waypoint_move.py','__ns:=red_actor_5','_vel:='+str(self.red_vel),'_red:=true','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y)]
 
                 pose_guppy = 'pose_guppy:='+str(self.first_guppy)
                 pose_dory = 'pose_dory:='+str(self.first_dory)
-                args2 = ['roslaunch','etddf','minau_tools.launch',pose_guppy,pose_dory]
+                args2 = ['roslaunch','minau_tools','uuv_etddf.launch',pose_guppy,pose_dory]
 
-                fileFor3 = self.data_loc+'/waypoints/'+'waypoints_'+str(i)+'.csv'
-                args3 = ['rosrun','etddf','waypoint_move.py','__ns:=red_actor_5',fileFor3,'_vel:='+str(self.red_vel)]
 
-                args4 = ['rosrun','etddf','search.py','_x:='+str(self.dim_x),'_y:='+str(self.dim_y),'_vel:='+str(self.blue_vel),'_lawn:='+str(self.lawn[j]),'_custody:='+str(self.custody[j])]
+                args4 = ['rosrun','minau_tools','waypoint_move.py','__ns:=guppy','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y)]
+                args5 = ['rosrun','minau_tools','waypoint_move.py','__ns:=dory','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y)]
+                
+
 
                 bagfile_name = self.config_names[j]+'_'+str(i+1)
-                args5 = 'rosbag record -O '+bagfile_name+' /bluerov2_3/pose_gt \
-                                                           /bluerov2_4/pose_gt \
-                                                           /bluerov2_5/pose_gt \
-                                                           /bluerov2_6/pose_gt \
-                                                           /red_actor_1/pose_gt \
-                                                           /bluerov2_3/etddf/estimate/network \
-                                                           /bluerov2_4/etddf/estimate/network \
-                                                           /bluerov2_5/etddf/estimate/network \
-                                                           /bluerov2_6/etddf/estimate/network \
-                                                           /bluerov2_3/strapdown/estimate \
-                                                           /bluerov2_4/strapdown/estimate \
-                                                           /bluerov2_5/strapdown/estimate \
-                                                           /bluerov2_6/strapdown/estimate \
-                                                           /bluerov2_3/sonar_processing/target_list \
-                                                           /bluerov2_4/sonar_processing/target_list \
-                                                           /bluerov2_5/sonar_processing/target_list \
-                                                           /bluerov2_6/sonar_processing/target_list'
-
-                proc2 = subprocess.Popen(args2)
-                # proc2 = subprocess.Popen(args2,stdout=FNULL,stderr=subprocess.STDOUT)
+                args6 = 'rosbag record -O '+bagfile_name+' /guppy/pose_gt \
+                                                           /dory/pose_gt \
+                                                           /red_actor_5/pose_gt \
+                                                           /guppy/etddf/estimate/network \
+                                                           /dory/etddf/estimate/network'
+                if self.debug:
+                    proc2 = subprocess.Popen(args2)
+                else:
+                    proc2 = subprocess.Popen(args2,stdout=FNULL,stderr=subprocess.STDOUT)
                 time.sleep(10)
-                # proc5 = subprocess.Popen(args5,stdin=subprocess.PIPE, shell=True, cwd=dirTo)
-                # proc3 = subprocess.Popen(args3,stdout=FNULL,stderr=subprocess.STDOUT)
-                # proc4 = subprocess.Popen(args4,stdout=FNULL,stderr=subprocess.STDOUT)
-                proc5 = subprocess.Popen(args5,stdin=subprocess.PIPE, shell=True, cwd=dirTo)
-                proc3 = subprocess.Popen(args3)
-                proc4 = subprocess.Popen(args4)
+                proc6 = subprocess.Popen(args6,stdin=subprocess.PIPE, shell=True, cwd=dirTo)
+                if self.debug:
+                    proc3 = subprocess.Popen(args3)
+                    proc4 = subprocess.Popen(args4)
+                    proc5 = subprocess.Popen(args5)
+                else:
+                    proc5 = subprocess.Popen(args5,stdout=FNULL,stderr=subprocess.STDOUT)
+                    proc3 = subprocess.Popen(args3,stdout=FNULL,stderr=subprocess.STDOUT)
+                    proc4 = subprocess.Popen(args4,stdout=FNULL,stderr=subprocess.STDOUT)
                 
-                rate = rospy.Rate(10)
-                # rospy.sleep(self.mins_per*60)
-                while not self.Done:
-                    rate.sleep()
+
+                rospy.sleep(self.mins_per_test*60)
+
 
                 terminate_ros_node("/record")
                 proc3.terminate()
                 proc4.terminate()
                 proc2.terminate()
+                proc5.terminate()
                 time.sleep(10)
-                self.Done = False
 
         print('All tests complete')
         print('Data located in data/'+self.test_group_name)

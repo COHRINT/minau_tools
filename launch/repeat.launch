@@ -4,5 +4,6 @@
     <node name="repeat_tester" pkg="minau_tools" type="repeat_tester.py" output="screen">
         <param name="file" value="$(arg config_file)"/>
         <param name="data_loc" value="$(arg data_location)"/>
+        <param name="debug" value="False"/>
     </node>
 </launch>

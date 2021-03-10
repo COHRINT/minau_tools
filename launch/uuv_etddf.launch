@@ -12,19 +12,19 @@
     <arg name="blue_team_positions" default="[$(arg pose_guppy), $(arg pose_dory), $(arg topside_position_enu)]"/>
     <arg name="red_team_names" default="[red_actor_5]"/>
 
-    <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_repeat_test.json"/>
+    <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_2_assets.json"/>
     <arg name="landmark_file" default="$(find etddf_minau)/config/landmarks_dummy.yaml"/>
 
     <arg name="quantization_enabled" default="true"/>
 
     <group ns="dory">    
         <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
-            <param name="config" value="$(find minau)/config/vehicle.sitl.json"/>
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
             <param name="rate" value="20.0"/>
-            <param name="use_truth" value="False" />
+            <param name="use_truth" value="True" />
         </node>
         <include file="$(find etddf_minau)/launch/etddf.launch">
-            <arg name="my_name" value="$(arg namespace)"/>
+            <arg name="my_name" value="dory"/>
             <arg name="blue_team_names" value="$(arg blue_team_names)"/>
             <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
             <arg name="red_team_names" value="$(arg red_team_names)" />
@@ -40,12 +40,12 @@
     </group>
     <group ns="guppy">    
         <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
-            <param name="config" value="$(find minau)/config/vehicle.sitl.json"/>
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
             <param name="rate" value="20.0"/>
-            <param name="use_truth" value="False" />
+            <param name="use_truth" value="True" />
         </node>
         <include file="$(find etddf_minau)/launch/etddf.launch">
-            <arg name="my_name" value="$(arg namespace)"/>
+            <arg name="my_name" value="guppy"/>
             <arg name="blue_team_names" value="$(arg blue_team_names)"/>
             <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
             <arg name="red_team_names" value="$(arg red_team_names)" />
@@ -59,4 +59,5 @@
             <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
         </node>
     </group>
-    
+
+</launch>  
