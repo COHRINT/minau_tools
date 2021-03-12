@@ -46,7 +46,7 @@ class repeatTester:
         self.first_dory = [-5,0,-1]
         self.red_vel = 0.5
         self.blue_vel = 0.3
-        self.debug = rospy.get_param(~"debug")
+        self.debug = rospy.get_param("~debug",False)
 
         #extracts data and asigns it to variables
         self.config_names=[]

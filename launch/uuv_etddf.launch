@@ -60,4 +60,31 @@
         </node>
     </group>
 
+    <group ns="surface">
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="surface"/>
+            <arg name="blue_team_names" value="$(arg blue_team_names)"/>
+            <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg topside_position_enu)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+            <arg name="strapdown" value="False" /> <!-- No IMU at surface-->
+        </include>
+
+        <node name="surface_communication" pkg="minau" type="surface_communication_node.py" output="screen">
+            <param name="rate" value="2.0"/>
+            <param name="schedule_period_sec" value="20"/>
+            <param name="asset_ping_period_sec" value="8"/>
+            <param name="schedule_file" value="$(arg schedule_file)"/>
+            <param name="sim_global_pose" value="false"/>
+
+            <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+
+            <param name="az_scalar" value="1.0"/>
+            <param name="schedule_enabled" value="true"/>
+            <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+        </node>
+  
+    </group>
+
 </launch>  

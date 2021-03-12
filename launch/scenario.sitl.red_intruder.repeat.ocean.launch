@@ -14,7 +14,7 @@
   <arg name="enable_search_planning" value="false"/>
   <arg name="enable_tracking" value="false"/>
 
-  <include file="$(find uuv_gazebo_worlds)/launch/ocean_waves.launch">
+  <include file="$(find minau_tools)/launch/ocean_waves.launch">
     <arg name="paused" value="true"/>
   </include>
 
@@ -61,7 +61,7 @@
   <arg name="use_360" default="true"/>
 
   <!-- Start the SIMULATED Modem Processing node -->
-  <include file="$(find minau)/launch/topside_beacon.sitl.launch">
+  <include file="$(find minau_tools)/launch/topside_beacon.sitl.launch">
     <arg name="asset_id" value="1"/>
     <arg name="namespace" value="surface"/>
 
