@@ -167,12 +167,15 @@ synced_times = []
 last_pose_gt = None
 last_pose_gt_time = None
 
+pose_gt_topic = '/' + MEASURED_NAME+ '/pose_gt'
 if args.etddf == True:
     etddf_topic = '/'+ASSET_NAME + '/etddf/estimate/' + MEASURED_NAME
-else:
+else:    
     etddf_topic = '/'+ASSET_NAME + '/strapdown/estimate'
+print(etddf_topic)
+print(pose_gt_topic)
 # etddf_topic = '/bluerov2_4/odometry/filtered'
-for topic, msg, t in bag.read_messages(topics=[etddf_topic, '/' + MEASURED_NAME+ '/pose_gt']):
+for topic, msg, t in bag.read_messages(topics=[etddf_topic, pose_gt_topic]):
     if topic == etddf_topic and last_pose_gt is not None:
         synced_3of3.append([msg, last_pose_gt])
         synced_times.append([t, last_pose_gt_time])

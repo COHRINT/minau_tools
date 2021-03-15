@@ -6,6 +6,7 @@ from etddf_minau.msg import Measurement, MeasurementPackage
 from etddf_minau.srv import GetMeasurementPackage
 import rospy
 import numpy as np
+from copy import deepcopy
 
 from cuquantization.quantize import measPkg2Bytes, bytes2MeasPkg
 
@@ -42,7 +43,20 @@ if __name__ == "__main__":
     # [comms_type, time_taken]
     # comm_scheme = [["broadcast_dory",4]]
     comm_scheme = [["ping_surface_to_dory", 3], ["ping_surface_to_guppy", 3], ["broadcast_surface",3], ["broadcast_dory",4], ["broadcast_guppy",4]]
+
+    # 0 comms delay
+    # comm_scheme = [["ping_surface_to_dory", 0],
+    #     ["broadcast_dory",1], ["broadcast_guppy",1], ["broadcast_dory",1],
+    #     ["ping_surface_to_guppy", 0], 
+    #     ["broadcast_guppy",1], ["broadcast_dory",1], ["broadcast_guppy",1],
+    #     ["broadcast_surface",0],
+    #     ["broadcast_dory",1], ["broadcast_guppy",1], ["broadcast_dory",1]
+    # ]
+    # comm_scheme = [["ping_surface_to_dory", 3], ["ping_surface_to_guppy", 3], ["broadcast_surface",3], ["broadcast_dory",4], ["broadcast_guppy",4]]
+
     # comm_scheme = [["ping_surface_to_dory", 3], ["ping_surface_to_guppy", 3], ["broadcast_surface",3]]
+    # comm_scheme = [["ping_surface_to_dory", 3], ["broadcast_surface",3]]
+    
     # comm_scheme = [["broadcast_dory",10], ["broadcast_guppy",4]]
 
     asset_landmark_dict = {"surface" : 0, "dory":1, "guppy" : 2, "red_actor_5" : 3}
@@ -78,7 +92,7 @@ if __name__ == "__main__":
             diff_y =measured_asset_pose.position.y - action_executed_by_pose.position.y
             diff_z =measured_asset_pose.position.z - action_executed_by_pose.position.z
             dist = np.linalg.norm([diff_x, diff_y, diff_z]) + np.random.normal(0, RANGE_SD)
-            range_meas = Measurement("modem_range", t, action_executed_by, measured_asset, dist, RANGE_SD**2, GLOBAL_POSE)
+            range_meas = Measurement("modem_range", t, action_executed_by, measured_asset, dist, RANGE_SD**2, GLOBAL_POSE, -1.0)
             
             if "surface" in curr_action:
                 latest_meas_pkg.src_asset = action_executed_by
@@ -88,7 +102,7 @@ if __name__ == "__main__":
                 # az_sd = ( 15*np.random.uniform() + 30 ) * (np.pi/180)
                 ang = np.arctan2(diff_y, diff_x) #+ np.random.normal(0, az_sd)
                 ang_deg = np.rad2deg(ang) + np.random.normal(0, AZIMUTH_SD)
-                az_meas = Measurement("modem_azimuth", t, action_executed_by, measured_asset, ang_deg, AZIMUTH_SD**2, GLOBAL_POSE)
+                az_meas = Measurement("modem_azimuth", t, action_executed_by, measured_asset, ang_deg, AZIMUTH_SD**2, GLOBAL_POSE, -1.0)
                 surface_meas_pkg.measurements.append(az_meas)
             else:
                 latest_meas_pkg.src_asset = action_executed_by
@@ -99,8 +113,8 @@ if __name__ == "__main__":
                 surface_meas_pkg.src_asset = "surface"
                 rospy.loginfo("surface broadcasting")
 
-                # bytes_ = measPkg2Bytes(surface_meas_pkg, asset_landmark_dict, 30)
-                # surface_meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
+                bytes_ = measPkg2Bytes(surface_meas_pkg, asset_landmark_dict, 32)
+                surface_meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
 
                 for asset_key in meas_pkg_pub_dict.keys():
                     meas_pkg_pub_dict[asset_key].publish(surface_meas_pkg)
@@ -111,12 +125,17 @@ if __name__ == "__main__":
                 gmp = rospy.ServiceProxy(agent + "/etddf/get_measurement_package", GetMeasurementPackage)
                 try:
                     meas_pkg = gmp().meas_pkg
-                    print('[Seatrac Snub] delivering buffer: ')
-                    print(meas_pkg)
-                    # bytes_ = measPkg2Bytes(meas_pkg, asset_landmark_dict, 30)
-                    # meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
-                    print("############### COMPRESSED ###################")
-                    print(meas_pkg)
+                    orig_meas_pkg = deepcopy(meas_pkg)
+                    bytes_ = measPkg2Bytes(meas_pkg, asset_landmark_dict, 32)
+                    meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
+
+                    # DEBUG THE COMPRESSION
+                    # for i in range(len(orig_meas_pkg.measurements)):
+                    #     print(orig_meas_pkg.measurements[i])
+                    #     print(meas_pkg.measurements[i])
+                    #     print("---")
+                    # meas_pkg = orig_meas_pkg
+
                     for asset_key in meas_pkg_pub_dict.keys():
                         if asset_key != agent:
                             print("publishing to: " + asset_key)
