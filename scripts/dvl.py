@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 rospy.init_node("dvl")
 pub = rospy.Publisher("dvl", Vector3, queue_size=2)
@@ -12,9 +13,23 @@ rate = rospy.Rate(10)
 
 def callback(msg):
     global pub
-    dvl_x = msg.twist.twist.linear.x + np.random.normal(0, scale=0.005)
-    dvl_y = msg.twist.twist.linear.y + np.random.normal(0, scale=0.005)
-    dvl_z = msg.twist.twist.linear.z + np.random.normal(0, scale=0.005)
+
+    #Find rotation matrix from quaternion
+    q = msg.pose.pose.orientation
+    r = R.from_quat([q.x, q.y, q.z, q.w]).as_dcm().transpose()
+
+    v = msg.twist.twist.linear
+    v3 = np.array([v.x,v.y,v.z]).transpose()
+
+    #Find velocity in body frame
+    dvl_v = r.dot(v3)
+
+    #Add Noise
+    dvl_x = dvl_v[0] + np.random.normal(0, scale=0.005)
+    dvl_y = dvl_v[1] + np.random.normal(0, scale=0.005)
+    dvl_z = dvl_v[2] + np.random.normal(0, scale=0.005)
+
+
     new_msg = Vector3(dvl_x, dvl_y, dvl_z)
     pub.publish(new_msg)
     rate.sleep()
