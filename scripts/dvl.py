@@ -11,6 +11,8 @@ pub = rospy.Publisher("dvl", Vector3Stamped, queue_size=2)
 
 rate = rospy.Rate(10)
 def callback(msg):
+    global pub
+    
     q = msg.pose.pose.orientation
     r = R.from_quat([q.x, q.y, q.z, q.w]).as_dcm().transpose()
 
