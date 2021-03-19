@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Vector3Stamped, Vector3
 from nav_msgs.msg import Odometry
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 rospy.init_node("dvl")
-pub = rospy.Publisher("dvl", Vector3, queue_size=2)
+pub = rospy.Publisher("dvl", Vector3Stamped, queue_size=2)
 
 rate = rospy.Rate(10)
-
 def callback(msg):
     global pub
 
@@ -30,7 +29,13 @@ def callback(msg):
     dvl_z = dvl_v[2] + np.random.normal(0, scale=0.005)
 
 
-    new_msg = Vector3(dvl_x, dvl_y, dvl_z)
+    new_vel = Vector3(dvl_x, dvl_y, dvl_z)
+    new_msg = Vector3Stamped()
+    new_msg.vector = new_vel
+    #get header set up
+    new_msg.header.stamp = rospy.get_rostime()
+    new_msg.header.frame_id = rospy.get_namespace() + 'base_link'
+
     pub.publish(new_msg)
     rate.sleep()
 
