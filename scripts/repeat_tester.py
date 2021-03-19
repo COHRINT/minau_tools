@@ -107,15 +107,15 @@ class repeatTester:
 
                 FNULL = open(os.devnull, 'w')
                 fileFor3 = self.data_loc+'/waypoints/'+'waypoints_'+str(i)+'.csv'
-                args3 = ['rosrun','minau_tools','waypoint_move.py','__ns:=red_actor_5','_vel:='+str(self.red_vel),'_red:=true','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y)]
+                args3 = ['rosrun','minau_tools','waypoint_move.py','__ns:=red_actor_5','_vel:='+str(self.red_vel),'_red:=true','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-3']
 
                 pose_guppy = 'pose_guppy:='+str(self.first_guppy)
                 pose_dory = 'pose_dory:='+str(self.first_dory)
                 args2 = ['roslaunch','minau_tools','uuv_etddf.launch',pose_guppy,pose_dory]
 
 
-                args4 = ['rosrun','minau_tools','waypoint_move.py','__ns:=guppy','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y)]
-                args5 = ['rosrun','minau_tools','waypoint_move.py','__ns:=dory','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y)]
+                args4 = ['rosrun','minau_tools','waypoint_move.py','__ns:=guppy','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-1']
+                args5 = ['rosrun','minau_tools','waypoint_move.py','__ns:=dory','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-2']
                 
 
 
