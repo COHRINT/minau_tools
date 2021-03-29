@@ -38,23 +38,23 @@ def normalize_velocity(v,speed):
     v.z = v.z/size
     return v
 
-def generate_waypt(red,dim_x,dim_y):
+def generate_waypt(red,dim_x,dim_y,z):
     if red:
         #generate pair of waypoints on opposite sides of region so it traverses whole space
         dir = random.randint(1,4)
         waypt = []
         if dir == 1:
-            waypt.append([random.random()*2*dim_x-dim_x,random.random()*5+dim_y,-1])
-            waypt.append([random.random()*2*dim_x-dim_x,-(random.random()*5+dim_y),-1])
+            waypt.append([random.random()*2*dim_x-dim_x,random.random()*5+dim_y,z])
+            waypt.append([random.random()*2*dim_x-dim_x,-(random.random()*5+dim_y),z])
         elif dir == 2:
-            waypt.append([random.random()*2*dim_x-dim_x,-(random.random()*5+dim_y),-1])
-            waypt.append([random.random()*2*dim_x-dim_x,(random.random()*5+dim_y),-1])
+            waypt.append([random.random()*2*dim_x-dim_x,-(random.random()*5+dim_y),z])
+            waypt.append([random.random()*2*dim_x-dim_x,(random.random()*5+dim_y),z])
         elif dir == 3:
-            waypt.append([-(random.random()*5+dim_x),random.random()*dim_y*2-dim_y,-1])
-            waypt.append([(random.random()*5+dim_x),(2*random.random()*dim_y-dim_y),-1])
+            waypt.append([-(random.random()*5+dim_x),random.random()*dim_y*2-dim_y,z])
+            waypt.append([(random.random()*5+dim_x),(2*random.random()*dim_y-dim_y),z])
         elif dir == 4:
-            waypt.append([(random.random()*5+dim_x),random.random()*dim_y*2-dim_y,-1])
-            waypt.append([-(random.random()*5+dim_x),(2*random.random()*dim_y-dim_y),-1])
+            waypt.append([(random.random()*5+dim_x),random.random()*dim_y*2-dim_y,z])
+            waypt.append([-(random.random()*5+dim_x),(2*random.random()*dim_y-dim_y),z])
 
         #teleport to first waypoint
         initial_point = Pose()
@@ -74,7 +74,7 @@ def generate_waypt(red,dim_x,dim_y):
 
         return waypt[1]
     else:
-        return [random.uniform(-dim_x,dim_x),random.uniform(-dim_y,dim_y),-1]
+        return [random.uniform(-dim_x,dim_x),random.uniform(-dim_y,dim_y),z]
 
 class Waypoint:
 
@@ -150,10 +150,11 @@ vel = rospy.get_param("~vel",0.5)
 red = rospy.get_param("~red",False)
 dim_x = rospy.get_param("~dimx",50)
 dim_y = rospy.get_param("~dimy",50)
+z = rospy.get_param("~z",-1)
 
 # Start up waypoint mover
 wp = Waypoint()
-target_waypt = generate_waypt(red,dim_x,dim_y)
+target_waypt = generate_waypt(red,dim_x,dim_y,z)
 
 #start with second waypoint
 waypt_num = 1
@@ -171,7 +172,7 @@ while not rospy.is_shutdown():
         dist = np.linalg.norm([diff_x, diff_y,diff_z])
         if dist < 0.5:
             #teleport red rov to next waypoint and send them off again
-            target_waypt = generate_waypt(red,dim_x,dim_y)
+            target_waypt = generate_waypt(red,dim_x,dim_y,z)
 
 
         if np.linalg.norm([wp.truth_pose.twist.twist.linear.x,wp.truth_pose.twist.twist.linear.y]) < 0.000001:
