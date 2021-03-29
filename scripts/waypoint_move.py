@@ -83,12 +83,14 @@ class Waypoint:
         Constructor the subscribes to a couple topics.
         """
         self.pose = None
+        self.truth_pose = None
         self.yaw = None
         if red:
             rospy.Subscriber("pose_gt", Odometry, self.pose_callback)
         else:
             rospy.Subscriber("etddf/estimate/"+rospy.get_namespace()[1:-1], Odometry, self.pose_callback)
         rospy.Subscriber("uuv_control/control_status", ControlStatus, self.yaw_estimate_callback)
+        rospy.Subscriber("pose_gt", Odometry, self.truth_pose_callback)
 
     def pose_callback(self, msg):
         """Stores all the odometry information
@@ -97,6 +99,14 @@ class Waypoint:
         """
         self.pose = msg
         (r, p, self.yaw) = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
+
+
+    def truth_pose_callback(self, msg):
+        """Stores all the odometry information
+        Arguments:
+            msg {Odometry} -- All the position and orientation of the rov
+        """
+        self.truth_pose = msg
 
     def yaw_estimate_callback(self, msg):
         self.yaw_estimate_deg = msg.current_heading
@@ -164,7 +174,7 @@ while not rospy.is_shutdown():
             target_waypt = generate_waypt(red,dim_x,dim_y)
 
 
-        if np.linalg.norm([wp.pose.twist.twist.linear.x,wp.pose.twist.twist.linear.y]) < 0.000001:
+        if np.linalg.norm([wp.truth_pose.twist.twist.linear.x,wp.truth_pose.twist.twist.linear.y]) < 0.000001:
             resp1 = arm_control()
 
         # Get New control
