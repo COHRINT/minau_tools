@@ -41,7 +41,8 @@ class repeatTester:
         self.config = []
         for row in reader:
             self.config.append(row)
-
+        
+        self.first_bruce = [5,5,-1]
         self.first_guppy = [5,0,-1]
         self.first_dory = [-5,0,-1]
         self.red_vel = 0.5
@@ -53,6 +54,7 @@ class repeatTester:
         self.custody = []
         for i in range(len(self.config)):
             self.config_names.append(self.config[i]['Test_Name'])
+        self.num_assets = int(self.config[0]['Number_Blue_Assets_dep'])
         self.test_group_name = self.config[0]['Test_Group_Name']
         self.num_groups = int(self.config[0]['Number_Tests_dep'])
         self.mins_per_test = int(self.config[0]['Mins_Per_Test_dep'])
@@ -86,6 +88,8 @@ class repeatTester:
     def teleport(self):
         """Teleports assets to starting positions
         """
+        if self.num_assets == 3:
+            set_model_state('bruce',self.first_bruce)
         set_model_state('guppy',self.first_guppy)
         set_model_state('dory',self.first_dory)
         set_model_state('red_actor_5',self.first_red)
@@ -109,14 +113,17 @@ class repeatTester:
                 fileFor3 = self.data_loc+'/waypoints/'+'waypoints_'+str(i)+'.csv'
                 args3 = ['rosrun','minau_tools','waypoint_move.py','__ns:=red_actor_5','_vel:='+str(self.red_vel),'_red:=true','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-3']
 
+                pose_bruce = 'pose_bruce:='+str(self.first_bruce)
                 pose_guppy = 'pose_guppy:='+str(self.first_guppy)
                 pose_dory = 'pose_dory:='+str(self.first_dory)
+                args1 = ['roslaunch','minau_tools','uuv_etddf3.launch',pose_bruce,pose_guppy,pose_dory]
                 args2 = ['roslaunch','minau_tools','uuv_etddf.launch',pose_guppy,pose_dory]
 
 
                 args4 = ['rosrun','minau_tools','waypoint_move.py','__ns:=guppy','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-1']
                 args5 = ['rosrun','minau_tools','waypoint_move.py','__ns:=dory','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-2']
-                
+                if self.num_assets==3:
+                    args7 = ['rosrun','minau_tools','waypoint_move.py','__ns:=bruce','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-2']
 
 
                 bagfile_name = self.config_names[j]+'_'+str(i+1)
@@ -125,20 +132,41 @@ class repeatTester:
                                                            /red_actor_5/pose_gt \
                                                            /guppy/etddf/estimate/network \
                                                            /dory/etddf/estimate/network'
+                if self.num_assets == 3: 
+                    args6 = 'rosbag record -O '+bagfile_name+' /guppy/pose_gt \
+                                                           /dory/pose_gt \
+                                                           /bruce/pose_gt \
+                                                           /red_actor_5/pose_gt \
+                                                           /bruce/etddf/estimate/network \
+                                                           /guppy/etddf/estimate/network \
+                                                           /dory/etddf/estimate/network'
+                proc2 = None
                 if self.debug:
-                    proc2 = subprocess.Popen(args2)
+                    if self.num_assets == 3:
+                        proc2 = subprocess.Popen(args1)
+                    else:
+                        proc2 = subprocess.Popen(args2)
                 else:
-                    proc2 = subprocess.Popen(args2,stdout=FNULL,stderr=subprocess.STDOUT)
+                    if self.num_assets == 3:
+                        proc2 = subprocess.Popen(args1,stdout=FNULL,stderr=subprocess.STDOUT)
+                    else:
+                        proc2 = subprocess.Popen(args2,stdout=FNULL,stderr=subprocess.STDOUT)
+
                 time.sleep(10)
                 proc6 = subprocess.Popen(args6,stdin=subprocess.PIPE, shell=True, cwd=dirTo)
                 if self.debug:
                     proc3 = subprocess.Popen(args3)
                     proc4 = subprocess.Popen(args4)
                     proc5 = subprocess.Popen(args5)
+                    if self.num_assets == 3:
+                        proc7 = subprocess.Popen(args7)
                 else:
                     proc5 = subprocess.Popen(args5,stdout=FNULL,stderr=subprocess.STDOUT)
                     proc3 = subprocess.Popen(args3,stdout=FNULL,stderr=subprocess.STDOUT)
                     proc4 = subprocess.Popen(args4,stdout=FNULL,stderr=subprocess.STDOUT)
+                    if self.num_assets == 3:
+                        proc7 = subprocess.Popen(args7,stdout=FNULL,stderr=subprocess.STDOUT)
+                        # proc7 = subprocess.Popen(args7)
                 
 
                 rospy.sleep(self.mins_per_test*60)
@@ -149,6 +177,8 @@ class repeatTester:
                 proc4.terminate()
                 proc2.terminate()
                 proc5.terminate()
+                if self.num_assets == 3:
+                    proc7.terminate()
                 time.sleep(10)
 
         print('All tests complete')

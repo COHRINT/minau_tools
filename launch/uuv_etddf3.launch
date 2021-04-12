@@ -1,0 +1,113 @@
+<launch>
+    <arg name="pose_bruce" default="[0,10,0]"/>
+    <arg name="pose_guppy" default="[-10,10,0]"/>
+    <arg name="pose_dory" default="[10,10,0]"/>
+    
+    <arg name="topside_x" value="0.0"/>
+    <arg name="topside_y" value="0.0"/>
+    <arg name="topside_z" value="0.0"/>
+    <arg name="topside_position_enu" value="[$(arg topside_y), $(arg topside_x), -$(arg topside_z)]"/>
+    <arg name="surface_beacon_pose_ned" default="[$(arg topside_x), $(arg topside_y), $(arg topside_z), 0.0]" />
+    
+    <arg name="blue_team_names" default="[bruce, guppy, dory, surface]"/>
+    <arg name="blue_team_positions" default="[$(arg pose_bruce), $(arg pose_guppy), $(arg pose_dory), $(arg topside_position_enu)]"/>
+    <arg name="red_team_names" default="[red_actor_5]"/>
+
+    <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_3_assets.json"/>
+    <arg name="landmark_file" default="$(find etddf_minau)/config/landmarks_dummy.yaml"/>
+
+    <arg name="quantization_enabled" default="true"/>
+
+    <group ns="bruce">    
+        <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
+            <param name="rate" value="20.0"/>
+            <param name="use_truth" value="True" />
+        </node>
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="bruce"/>
+            <arg name="blue_team_names" value="$(arg blue_team_names)"/>
+            <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg pose_bruce)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+        </include> 
+        <node name="fleet_communication" pkg="minau" type="fleet_communication_node.py" output="screen">
+            <param name="rate" value="2.0"/>
+            <param name="schedule_file" value="$(arg schedule_file)"/>
+            <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+            <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+        </node>
+    </group>
+
+    <group ns="dory">    
+        <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
+            <param name="rate" value="20.0"/>
+            <param name="use_truth" value="True" />
+        </node>
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="dory"/>
+            <arg name="blue_team_names" value="$(arg blue_team_names)"/>
+            <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg pose_dory)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+        </include> 
+        <node name="fleet_communication" pkg="minau" type="fleet_communication_node.py" output="screen">
+            <param name="rate" value="2.0"/>
+            <param name="schedule_file" value="$(arg schedule_file)"/>
+            <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+            <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+        </node>
+    </group>
+    <group ns="guppy">    
+        <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
+            <param name="rate" value="20.0"/>
+            <param name="use_truth" value="True" />
+        </node>
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="guppy"/>
+            <arg name="blue_team_names" value="$(arg blue_team_names)"/>
+            <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg pose_guppy)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+        </include> 
+        <node name="fleet_communication" pkg="minau" type="fleet_communication_node.py" output="screen">
+            <param name="rate" value="20.0"/>
+            <param name="schedule_file" value="$(arg schedule_file)"/>
+            <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+            <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+        </node>
+    </group>
+
+    <group ns="surface">
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="surface"/>
+            <arg name="blue_team_names" value="$(arg blue_team_names)"/>
+            <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg topside_position_enu)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+            <arg name="strapdown" value="False" /> <!-- No IMU at surface-->
+        </include>
+
+        <node name="surface_communication" pkg="minau" type="surface_communication_node.py" output="screen">
+            <param name="rate" value="2.0"/>
+            <param name="schedule_period_sec" value="20"/>
+            <param name="asset_ping_period_sec" value="8"/>
+            <param name="schedule_file" value="$(arg schedule_file)"/>
+            <param name="sim_global_pose" value="false"/>
+
+            <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+
+            <param name="az_scalar" value="1.0"/>
+            <param name="schedule_enabled" value="true"/>
+            <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+        </node>
+  
+    </group>
+
+</launch>  
