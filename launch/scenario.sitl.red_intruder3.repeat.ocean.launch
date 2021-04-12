@@ -195,7 +195,7 @@
 
   <include file="$(find minau_tools)/launch/vehicle.red_actor.sitl.launch">
     <arg name="asset_id" value="5"/>
-
+    <arg name="ardusub_instance" value="4"/>
     <arg name="x" value="$(arg x_5)"/>
     <arg name="y" value="$(arg y_5)"/>
     <arg name="z" value="$(arg z_5)"/>
