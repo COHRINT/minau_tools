@@ -1,2 +1,2 @@
 Test_Group_Name,Test_Name,Mins_Per_Test_dep,Number_Tests_dep,Map_Dim_x_dep,Map_Dim_y_dep
-Test_3,Search,10,10,10,10
+Small_Test_2,Search,2,5,10,10
