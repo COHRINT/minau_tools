@@ -1,2 +1,2 @@
 Test_Group_Name,Test_Name,Mins_Per_Test_dep,Number_Tests_dep,Map_Dim_x_dep,Map_Dim_y_dep,Number_Blue_Assets_dep
-Test_10min_10by10_3asset_1,Search,10,10,10,10,3
+Test_10min_20by20_3asset_1,Search,10,10,10,10,3
