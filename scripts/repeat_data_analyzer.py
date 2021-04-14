@@ -23,12 +23,13 @@ def quadratureDiff(A,B):
     return np.linalg.norm([x_diff, y_diff,z_diff])
 
 class AnalyzeData:
-    def __init__(self,data,x,y):
+    def __init__(self,data,x,y,threeblue):
         """Reads in all the bag files and stores their data
         Arguments:
             data {string} -- location of bag files from scripts file
         """
         self.dim = [x,y]
+        self.threeblue = threeblue
 
         #Finds Data
         os.chdir("..")
@@ -50,6 +51,16 @@ class AnalyzeData:
         self.estimate4_red = [[]for i in range(len(self.bag_files))]
         self.spotted3 = [[]for i in range(len(self.bag_files))]
         self.spotted4 = [[]for i in range(len(self.bag_files))]
+
+        if self.threeblue:
+            self.truth_poses5 = [[]for i in range(len(self.bag_files))]
+            self.estimate5_poses5 = [[]for i in range(len(self.bag_files))]
+            self.estimate5_poses4 = [[]for i in range(len(self.bag_files))]
+            self.estimate5_poses3 = [[]for i in range(len(self.bag_files))]
+            self.estimate5_red = [[]for i in range(len(self.bag_files))]
+            self.estimate3_poses5 = [[]for i in range(len(self.bag_files))]
+            self.estimate4_poses5 = [[]for i in range(len(self.bag_files))]
+
         self.merge_spottings = [[]for i in range(len(self.bag_files))]
         self.ratio = []
         self.plot_count = 1
@@ -77,6 +88,19 @@ class AnalyzeData:
             self.estimate4_poses3[i] = self.extract_odometry_network('/guppy/etddf/estimate/network',bag,'dory')
             self.estimate3_red[i] = self.extract_odometry_network('/dory/etddf/estimate/network',bag,'red_actor_5')
             self.estimate4_red[i] = self.extract_odometry_network('/guppy/etddf/estimate/network',bag,'red_actor_5')
+
+            if self.threeblue:
+                self.truth_poses5[i] = self.extract_odometry('/bruce/pose_gt',bag)
+
+                self.estimate5_poses5[i] = self.extract_odometry_network('/bruce/etddf/estimate/network',bag,'bruce')
+                self.estimate5_poses3[i] = self.extract_odometry_network('/bruce/etddf/estimate/network',bag,'dory')
+                self.estimate5_poses4[i] = self.extract_odometry_network('/bruce/etddf/estimate/network',bag,'guppy')
+                self.estimate5_red[i] = self.extract_odometry_network('/bruce/etddf/estimate/network',bag,'red_actor_5')
+
+                self.estimate3_poses5[i] = self.extract_odometry_network('/dory/etddf/estimate/network',bag,'bruce')
+                self.estimate4_poses5[i] = self.extract_odometry_network('/guppy/etddf/estimate/network',bag,'bruce')
+                
+
             bag.close()
 
         #Gets the times the red asset is in the zone for each trial
@@ -95,6 +119,14 @@ class AnalyzeData:
         self.network_error_3r = [[]for i in range(len(self.bag_files))]
         self.network_error_4r = [[]for i in range(len(self.bag_files))]
 
+        if self.threeblue:
+            self.network_error_55 = [[]for i in range(len(self.bag_files))]
+            self.network_error_53 = [[]for i in range(len(self.bag_files))]
+            self.network_error_54 = [[]for i in range(len(self.bag_files))]
+            self.network_error_5r = [[]for i in range(len(self.bag_files))]
+            self.network_error_35 = [[]for i in range(len(self.bag_files))]
+            self.network_error_45 = [[]for i in range(len(self.bag_files))]
+
         for i in range(len(self.bag_files)):
             self.network_error_33[i] = self.get_network_error(self.truth_poses3[i],self.estimate3_poses3[i])
             self.network_error_44[i] = self.get_network_error(self.truth_poses4[i],self.estimate4_poses4[i])
@@ -102,6 +134,13 @@ class AnalyzeData:
             self.network_error_43[i] = self.get_network_error(self.truth_poses3[i],self.estimate4_poses3[i])
             self.network_error_3r[i] = self.get_network_error(self.truth_red[i],self.estimate3_red[i])
             self.network_error_4r[i] = self.get_network_error(self.truth_red[i],self.estimate4_red[i])
+            if self.threeblue:
+                self.network_error_55 = self.get_network_error(self.truth_poses5[i],self.estimate5_poses5[i])
+                self.network_error_53 = self.get_network_error(self.truth_poses3[i],self.estimate5_poses3[i])
+                self.network_error_54 = self.get_network_error(self.truth_poses4[i],self.estimate5_poses4[i])
+                self.network_error_5r = self.get_network_error(self.truth_red[i],self.estimate5_red[i])
+                self.network_error_35 = self.get_network_error(self.truth_poses5[i],self.estimate3_poses5[i])
+                self.network_error_45 = self.get_network_error(self.truth_poses5[i],self.estimate4_poses5[i])
 
         self.groups,self.group_names = self.get_groups()
         # self.graph_network_error()
@@ -239,9 +278,20 @@ class AnalyzeData:
 
     def write_data(self):
         f = open(self.data_loc+'/data.csv','w')
-        f.write('Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Avg_Blue_Error3,Avg_Red_Error3,Avg_Ownship_Error4,Avg_Blue_Error4,Avg_Red_Error4\n')
-        for i in range(len(self.bag_files)):
-            f.write(self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i])+','+str(self.network_error_34[i])+','+str(self.network_error_3r[i])+','+str(self.network_error_44[i])+','+str(self.network_error_43[i])+','+str(self.network_error_4r[i])+'\n')
+        if not self.threeblue:
+            f.write('Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Avg_Blue_Error3,Avg_Red_Error3,Avg_Ownship_Error4,Avg_Blue_Error4,Avg_Red_Error4\n')
+            for i in range(len(self.bag_files)):
+                f.write(self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i])+','+str(self.network_error_34[i])+','+str(self.network_error_3r[i])+','+str(self.network_error_44[i])+','+str(self.network_error_43[i])+','+str(self.network_error_4r[i])+'\n')
+        else:
+            first_line = 'Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Avg_Blue_Error34,Avg_Red_Error3,Avg_Ownship_Error4,Avg_Blue_Error43,Avg_Red_Error4'
+            first_line +=',Avg_Ownship_Error5,Avg_Blue_Error54,Avg_Red_Error5,Avg_Blue_Error53,Avg_Blue_Error35,Avg_Blue_Error45\n'
+            f.write(first_line)
+            for i in range(len(self.bag_files)):
+                data = self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i])+','+str(self.network_error_34[i])+','+str(self.network_error_3r[i])
+                data += ','+str(self.network_error_44[i])+','+str(self.network_error_43[i])+','+str(self.network_error_4r[i]) + ',' + str(self.network_error_55[i])
+                data += ','+str(self.network_error_54[i])+','+str(self.network_error_5r[i])+','+str(self.network_error_53[i])+','+str(self.network_error_35[i])
+                data += ','+str(self.network_error_45[i])+'\n'
+                f.write(data)
         f.close()
     def get_network_error(self,truth,estimate):
         if len(estimate) == 0:
@@ -405,8 +455,10 @@ if __name__=="__main__":
     parser.add_argument("location", type=str, help="location of data relative to minau_tools eg(repeat_data/phaseX_x/)")
     parser.add_argument("x", type=int, help="Length in x dimension equalvelent to that put in the csv")
     parser.add_argument("y", type=int, help="Length in y dimension equalvelent to that put in the csv")
+    parser.add_argument("threeblue",type=bool,help="True for 3 blue assets, False for 2 blue assets")
     args = parser.parse_args()
     data_location = args.location
     x = args.x
     y = args.y
-    ad = AnalyzeData(data_location,x,y)
+    threeblue = args.threeblue
+    ad = AnalyzeData(data_location,x,y,threeblue)
