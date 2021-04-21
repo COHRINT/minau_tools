@@ -135,12 +135,12 @@ class AnalyzeData:
             self.network_error_3r[i] = self.get_network_error(self.truth_red[i],self.estimate3_red[i])
             self.network_error_4r[i] = self.get_network_error(self.truth_red[i],self.estimate4_red[i])
             if self.threeblue:
-                self.network_error_55 = self.get_network_error(self.truth_poses5[i],self.estimate5_poses5[i])
-                self.network_error_53 = self.get_network_error(self.truth_poses3[i],self.estimate5_poses3[i])
-                self.network_error_54 = self.get_network_error(self.truth_poses4[i],self.estimate5_poses4[i])
-                self.network_error_5r = self.get_network_error(self.truth_red[i],self.estimate5_red[i])
-                self.network_error_35 = self.get_network_error(self.truth_poses5[i],self.estimate3_poses5[i])
-                self.network_error_45 = self.get_network_error(self.truth_poses5[i],self.estimate4_poses5[i])
+                self.network_error_55[i] = self.get_network_error(self.truth_poses5[i],self.estimate5_poses5[i])
+                self.network_error_53[i] = self.get_network_error(self.truth_poses3[i],self.estimate5_poses3[i])
+                self.network_error_54[i] = self.get_network_error(self.truth_poses4[i],self.estimate5_poses4[i])
+                self.network_error_5r[i] = self.get_network_error(self.truth_red[i],self.estimate5_red[i])
+                self.network_error_35[i] = self.get_network_error(self.truth_poses5[i],self.estimate3_poses5[i])
+                self.network_error_45[i] = self.get_network_error(self.truth_poses5[i],self.estimate4_poses5[i])
 
         self.groups,self.group_names = self.get_groups()
         # self.graph_network_error()
