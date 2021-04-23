@@ -46,6 +46,9 @@ class AnalyzeData:
         self.data_loc = os.getcwd()+'/'+data
         os.chdir(self.data_loc)
         print(self.data_loc)
+
+        self.file_name = data.split("/")[-1]
+
          
         self.bag_files = [i for i in os.listdir('.') if i[-3:]=='bag']              #Gets all the bag files
 
@@ -287,7 +290,7 @@ class AnalyzeData:
 
 
     def write_data(self):
-        f = open(self.data_loc+'/data.csv','w')
+        f = open(self.data_loc+'/'+self.file_name+'.csv','w')
         if not self.threeblue:
             first_line = 'Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Std_Ownship_Error3,Avg_Blue_Error3,Std_Blue_Error3,'
             first_line += 'Avg_Red_Error3,Std_Red_Error3,Avg_Ownship_Error4,Std_Ownship_Error4,Avg_Blue_Error4,Std_Blue_Error4,Avg_Red_Error4,Std_Red_Error4\n'
