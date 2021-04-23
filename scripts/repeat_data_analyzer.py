@@ -23,13 +23,23 @@ def quadratureDiff(A,B):
     return np.linalg.norm([x_diff, y_diff,z_diff])
 
 class AnalyzeData:
-    def __init__(self,data,x,y,threeblue):
+    def __init__(self,data,x,y,numassets):
         """Reads in all the bag files and stores their data
         Arguments:
             data {string} -- location of bag files from scripts file
         """
         self.dim = [x,y]
-        self.threeblue = threeblue
+
+        if not (numassets==3 or numassets==2):
+            print('Not functional for '+ str(numassets) + " assets yet")
+            exit()
+        
+
+
+        self.threeblue = False
+
+        if numassets == 3:
+            self.threeblue = True
 
         #Finds Data
         os.chdir("..")
@@ -279,18 +289,34 @@ class AnalyzeData:
     def write_data(self):
         f = open(self.data_loc+'/data.csv','w')
         if not self.threeblue:
-            f.write('Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Avg_Blue_Error3,Avg_Red_Error3,Avg_Ownship_Error4,Avg_Blue_Error4,Avg_Red_Error4\n')
-            for i in range(len(self.bag_files)):
-                f.write(self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i])+','+str(self.network_error_34[i])+','+str(self.network_error_3r[i])+','+str(self.network_error_44[i])+','+str(self.network_error_43[i])+','+str(self.network_error_4r[i])+'\n')
-        else:
-            first_line = 'Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Avg_Blue_Error34,Avg_Red_Error3,Avg_Ownship_Error4,Avg_Blue_Error43,Avg_Red_Error4'
-            first_line +=',Avg_Ownship_Error5,Avg_Blue_Error54,Avg_Red_Error5,Avg_Blue_Error53,Avg_Blue_Error35,Avg_Blue_Error45\n'
+            first_line = 'Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Std_Ownship_Error3,Avg_Blue_Error3,Std_Blue_Error3,'
+            first_line += 'Avg_Red_Error3,Std_Red_Error3,Avg_Ownship_Error4,Std_Ownship_Error4,Avg_Blue_Error4,Std_Blue_Error4,Avg_Red_Error4,Std_Red_Error4\n'
             f.write(first_line)
             for i in range(len(self.bag_files)):
-                data = self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i])+','+str(self.network_error_34[i])+','+str(self.network_error_3r[i])
-                data += ','+str(self.network_error_44[i])+','+str(self.network_error_43[i])+','+str(self.network_error_4r[i]) + ',' + str(self.network_error_55[i])
-                data += ','+str(self.network_error_54[i])+','+str(self.network_error_5r[i])+','+str(self.network_error_53[i])+','+str(self.network_error_35[i])
-                data += ','+str(self.network_error_45[i])+'\n'
+                data = self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i][0])
+                data += ','+str(self.network_error_33[i][1])+','
+                data += str(self.network_error_34[i][0])+','+ str(self.network_error_34[i][1])+','+ str(self.network_error_3r[i][0])
+                data += ','+ str(self.network_error_3r[i][1])+ ','+str(self.network_error_44[i][0])+ ','+str(self.network_error_44[i][1])
+                data +=  ','+str(self.network_error_43[i][0])+','+str(self.network_error_43[i][1])+','
+                data += str(self.network_error_4r[i][0])+','+str(self.network_error_4r[i][1])+'\n'
+                f.write(data)
+        else:
+            first_line = 'Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Std_Ownship_Error3,Avg_Blue_Error34,Std_Blue_Error34'
+            first_line += ',Avg_Red_Error3,Std_Red_Error3,Avg_Ownship_Error4,Std_Ownship_Error4,Avg_Blue_Error43,Std_Blue_Error43,Avg_Red_Error4,Std_Red_Error4'
+            first_line +=',Avg_Ownship_Error5,Std_Ownship_Error5,Avg_Blue_Error54,Std_Blue_Error54,Avg_Red_Error5,Std_Red_Error5'
+            first_line +=',Avg_Blue_Error53,Std_Blue_Error53,Avg_Blue_Error35,Std_Blue_Error35,Avg_Blue_Error45,std_Blue_Error45\n'
+            f.write(first_line)
+            for i in range(len(self.bag_files)):
+                data = self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i][0])
+                data += ','+str(self.network_error_33[i][1])+ ','+str(self.network_error_34[i][0])+','+str(self.network_error_34[i][1])
+                data += ','+str(self.network_error_3r[i][0]) + ','+str(self.network_error_3r[i][1])
+                data += ','+str(self.network_error_44[i][0])+','+str(self.network_error_44[i][1])+','+str(self.network_error_43[i][0])
+                data += ','+str(self.network_error_43[i][1])+ ','+str(self.network_error_4r[i][0])+ ','+str(self.network_error_4r[i][1]) 
+                data += ',' + str(self.network_error_55[i][0]) + ',' + str(self.network_error_55[i][1])
+                data += ','+str(self.network_error_54[i][0])+','+str(self.network_error_54[i][1])+','+str(self.network_error_5r[i][0])
+                data += ','+str(self.network_error_5r[i][1])+ ','+str(self.network_error_53[i][0])+ ','+str(self.network_error_53[i][1])
+                data += ','+str(self.network_error_35[i][0]) + ','+str(self.network_error_35[i][1])
+                data += ','+str(self.network_error_45[i][0])+','+str(self.network_error_45[i][1])+'\n'
                 f.write(data)
         f.close()
     def get_network_error(self,truth,estimate):
@@ -313,7 +339,7 @@ class AnalyzeData:
                 i += ratio
                 continue
             min_time_diff = abs(truth[i][3] - estimate[count][3])
-        return np.average(error)
+        return [np.average(error),np.std(error)]
         
 
 
@@ -455,10 +481,10 @@ if __name__=="__main__":
     parser.add_argument("location", type=str, help="location of data relative to minau_tools eg(repeat_data/phaseX_x/)")
     parser.add_argument("x", type=int, help="Length in x dimension equalvelent to that put in the csv")
     parser.add_argument("y", type=int, help="Length in y dimension equalvelent to that put in the csv")
-    parser.add_argument("threeblue",type=bool,help="True for 3 blue assets, False for 2 blue assets")
+    parser.add_argument("numassets",type=int,help="Enter number of blue assets")
     args = parser.parse_args()
     data_location = args.location
     x = args.x
     y = args.y
-    threeblue = args.threeblue
-    ad = AnalyzeData(data_location,x,y,threeblue)
+    numassets = args.numassets
+    ad = AnalyzeData(data_location,x,y,numassets)
