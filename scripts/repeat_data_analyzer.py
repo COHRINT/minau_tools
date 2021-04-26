@@ -307,7 +307,7 @@ class AnalyzeData:
             first_line = 'Test_Name,Time_to_Spot,Percent_Tracked,Avg_Ownship_Error3,Std_Ownship_Error3,Avg_Blue_Error34,Std_Blue_Error34'
             first_line += ',Avg_Red_Error3,Std_Red_Error3,Avg_Ownship_Error4,Std_Ownship_Error4,Avg_Blue_Error43,Std_Blue_Error43,Avg_Red_Error4,Std_Red_Error4'
             first_line +=',Avg_Ownship_Error5,Std_Ownship_Error5,Avg_Blue_Error54,Std_Blue_Error54,Avg_Red_Error5,Std_Red_Error5'
-            first_line +=',Avg_Blue_Error53,Std_Blue_Error53,Avg_Blue_Error35,Std_Blue_Error35,Avg_Blue_Error45,std_Blue_Error45\n'
+            first_line +=',Avg_Blue_Error53,Std_Blue_Error53,Avg_Blue_Error35,Std_Blue_Error35,Avg_Blue_Error45,Std_Blue_Error45\n'
             f.write(first_line)
             for i in range(len(self.bag_files)):
                 data = self.bag_files[i][:-4]+','+str(self.tracking_data[i][1]/10**9)+','+str(self.tracking_data[i][0])+','+str(self.network_error_33[i][0])
