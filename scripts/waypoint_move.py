@@ -193,7 +193,7 @@ while not rospy.is_shutdown():
         rospy.wait_for_service('uuv_control/set_heading_velocity')
         try:
             shv = rospy.ServiceProxy('uuv_control/set_heading_velocity', SetHeadingVelocity)
-            resp1 = shv(ang * (180/np.pi), v3)
+            resp1 = shv(90, v3)
         except rospy.ServiceException, e:
             print "Set Heading Velocity Service call failed: %s"%e
 

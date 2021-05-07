@@ -23,6 +23,17 @@ roslaunch minau_tools repeat.launch
 
 To start the repeat tester.
 
+### Data Analyzer
+
+To analyze the bagged data from the repeat tests all you need to do is use the scripts/repeat_data_analyzer.py script. This extracts the average estimate error and the standart deviation of the error for each test.
+
+```bash
+cd scripts
+./repeat_data_analyzer.py repeat_data/<YOUR TEST NAME> <YOUR TEST X DIM> <YOUR TEST Y DIMENSION> <NUMBER OF BLUE ASSETS IN YOUR TEST>
+```
+
+This will create a csv in the directory of the specifed test with all the errors and standard deviations.
+
 ### Hyper Timing
 
 To play around with hyper timing, go to 'minau_tools/worlds/ocean_waves_hyper.world' and adjust the settings for the physics engine. There are a
