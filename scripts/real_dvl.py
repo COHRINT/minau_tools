@@ -2,14 +2,17 @@
 from wldvl import WlDVL
 import rospy
 from geometry_msgs.msg import Vector3Stamped
+from cuprint.cuprint import CUPrint
 
-
-dvl_pub = rospy.Publisher("wl_dvl",Vector3Stamped,queue_size=5)
+dvl_pub = rospy.Publisher("dvl",Vector3Stamped,queue_size=5)
 rospy.init_node('real_dvl')
+cuprint = CUPrint(rospy.get_name())
+cuprint("Loading")
 
-dvl = WlDVL("/dev/ttyS1")
+dvl = WlDVL("/dev/dvl")
 while not rospy.is_shutdown():
     report = dvl.read()
+    cuprint("Reading")
     if report is not None:
         if report['valid']:
             v = Vector3Stamped()
@@ -20,3 +23,5 @@ while not rospy.is_shutdown():
             v.vector.z = report['vz']
             print(report)
             dvl_pub.publish(v)
+        else:
+            cuprint("invalid read", warn=True)
