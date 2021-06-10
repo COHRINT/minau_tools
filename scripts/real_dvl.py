@@ -12,7 +12,6 @@ cuprint("Loading")
 dvl = WlDVL("/dev/dvl")
 while not rospy.is_shutdown():
     report = dvl.read()
-    cuprint("Reading")
     if report is not None:
         if report['valid']:
             v = Vector3Stamped()
@@ -21,7 +20,6 @@ while not rospy.is_shutdown():
             v.vector.x = report['vx']
             v.vector.y = report['vy']
             v.vector.z = report['vz']
-            print(report)
             dvl_pub.publish(v)
         else:
             cuprint("invalid read", warn=True)
