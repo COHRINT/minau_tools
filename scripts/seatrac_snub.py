@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 from __future__ import division
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Empty, Int16
 from geometry_msgs.msg import Pose
 from etddf_minau.msg import Measurement, MeasurementPackage
 from etddf_minau.srv import GetMeasurementPackage
 import rospy
 import numpy as np
 from copy import deepcopy
+import argparse
 
 from cuquantization.quantize import measPkg2Bytes, bytes2MeasPkg
 
@@ -24,6 +26,9 @@ AZIMUTH_SD = 5
 
 GLOBAL_POSE = [0,0,0,0]
 
+NUM_BYTES = 32
+COMPRESSION = False
+
 class SeatracSnub:
 
     def __init__(self, robot_names):
@@ -38,33 +43,39 @@ class SeatracSnub:
         self.poses[robot_name] = msg.pose.pose
 
 if __name__ == "__main__":
-    rospy.init_node("seatrac_snub")
+    rospy.init_node("seatrac_snub", anonymous=True)
+
+    parser = argparse.ArgumentParser(description='Setpoint visitor')
+    parser.add_argument("-c", "--comms", type=str, help="if set then allow comms", required=False)
+    args = parser.parse_args()
+    comms = args.comms
 
     # [comms_type, time_taken]
-    # comm_scheme = [["broadcast_dory",4]]
-    comm_scheme = [["ping_surface_to_dory", 3], ["ping_surface_to_guppy", 3], ["broadcast_surface",3], ["broadcast_dory",4], ["broadcast_guppy",4]]
+    # PING_DELAY = 2
+    # BROADCAST_DELAY = 4
+    # comm_scheme = [["ping_surface_to_dory", PING_DELAY], ["ping_surface_to_guppy", PING_DELAY], ["broadcast_surface",BROADCAST_DELAY], ["broadcast_dory",BROADCAST_DELAY], ["broadcast_guppy",BROADCAST_DELAY]]
+    # COMPRESSION = True
 
-    # 0 comms delay
-    # comm_scheme = [["ping_surface_to_dory", 0],
-    #     ["broadcast_dory",1], ["broadcast_guppy",1], ["broadcast_dory",1],
-    #     ["ping_surface_to_guppy", 0], 
-    #     ["broadcast_guppy",1], ["broadcast_dory",1], ["broadcast_guppy",1],
-    #     ["broadcast_surface",0],
-    #     ["broadcast_dory",1], ["broadcast_guppy",1], ["broadcast_dory",1]
-    # ]
-    # comm_scheme = [["ping_surface_to_dory", 3], ["ping_surface_to_guppy", 3], ["broadcast_surface",3], ["broadcast_dory",4], ["broadcast_guppy",4]]
+    PING_DELAY = 3.5
+    BROADCAST_DELAY = 1
+    if comms == None:
+        comm_scheme = [["ping_surface_to_dory", PING_DELAY], ["ping_surface_to_guppy", PING_DELAY], ["broadcast_surface",BROADCAST_DELAY]]
+    else:
+        comm_scheme = [["broadcast_dory",BROADCAST_DELAY], ["broadcast_guppy",BROADCAST_DELAY]]
+    print(comm_scheme)
 
-    # comm_scheme = [["ping_surface_to_dory", 3], ["ping_surface_to_guppy", 3], ["broadcast_surface",3]]
-    # comm_scheme = [["ping_surface_to_dory", 3], ["broadcast_surface",3]]
-    
-    # comm_scheme = [["broadcast_dory",10], ["broadcast_guppy",4]]
 
     asset_landmark_dict = {"surface" : 0, "dory":1, "guppy" : 2, "red_actor_5" : 3}
+
+    event_pubs = {}
 
     assets = ["dory", "guppy"]
     meas_pkg_pub_dict = {}
     for a in assets:
         meas_pkg_pub_dict[a] = rospy.Publisher(a + "/etddf/packages_in", MeasurementPackage, queue_size=10)
+        event_pubs[a] = rospy.Publisher("/event_pubs/" + a, Int16, queue_size=10)
+
+    event_pubs["surface"] = rospy.Publisher("/event_pubs/surface", Int16, queue_size=10)
     seasnub = SeatracSnub(assets)
 
     curr_index = 0
@@ -113,21 +124,44 @@ if __name__ == "__main__":
                 surface_meas_pkg.src_asset = "surface"
                 rospy.loginfo("surface broadcasting")
 
-                bytes_ = measPkg2Bytes(surface_meas_pkg, asset_landmark_dict, 32)
-                surface_meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
+                if COMPRESSION:
+                    bytes_ = measPkg2Bytes(surface_meas_pkg, asset_landmark_dict, NUM_BYTES)
+                    surface_meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
 
+                event_pubs["surface"].publish(Int16())
                 for asset_key in meas_pkg_pub_dict.keys():
                     meas_pkg_pub_dict[asset_key].publish(surface_meas_pkg)
                 surface_meas_pkg = MeasurementPackage()
             else:
+                
                 agent = curr_action[len("broadcast_"):]
+                rospy.loginfo("{} broadcasting".format(agent))
                 rospy.wait_for_service(agent + "/etddf/get_measurement_package")
                 gmp = rospy.ServiceProxy(agent + "/etddf/get_measurement_package", GetMeasurementPackage)
+                rospy.loginfo("Acquired service")
                 try:
                     meas_pkg = gmp().meas_pkg
                     orig_meas_pkg = deepcopy(meas_pkg)
-                    bytes_ = measPkg2Bytes(meas_pkg, asset_landmark_dict, 32)
-                    meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
+
+                    if COMPRESSION:
+                        rospy.loginfo("Compressing")
+                        bytes_ = measPkg2Bytes(meas_pkg, asset_landmark_dict, NUM_BYTES)
+                        meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
+
+                    print("#"*20)
+                    num_bursts = 0
+                    num_explicit = 0
+                    explicit_meas = []
+                    for msg in meas_pkg.measurements:
+                        if "burst" in msg.meas_type:
+                            num_bursts += 1
+                        else:
+                            num_explicit += 1
+                            meas_type = "{}_{}_{}".format(msg.meas_type, msg.src_asset, msg.measured_asset)
+                            explicit_meas.append( [meas_type, msg.data, msg.stamp.to_sec()] )
+                    print("Delta Tier: {}".format(meas_pkg.delta_multiplier))
+                    print("Num bursts: {} |    Num explicit: {}".format(num_bursts, num_explicit))
+                    print(explicit_meas)
 
                     # DEBUG THE COMPRESSION
                     # for i in range(len(orig_meas_pkg.measurements)):
@@ -135,7 +169,7 @@ if __name__ == "__main__":
                     #     print(meas_pkg.measurements[i])
                     #     print("---")
                     # meas_pkg = orig_meas_pkg
-
+                    event_pubs[agent].publish(Int16(meas_pkg.delta_multiplier))
                     for asset_key in meas_pkg_pub_dict.keys():
                         if asset_key != agent:
                             print("publishing to: " + asset_key)
@@ -144,6 +178,8 @@ if __name__ == "__main__":
                             rospy.sleep(0.1)
                 except rospy.ServiceException as e:
                     print(e)
+                
+                # break
 
         curr_index = (curr_index + 1) % len(comm_scheme)
         rospy.sleep( curr_comms[COMMS_TIME_INDEX] )

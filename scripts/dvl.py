@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation as R
 rospy.init_node("dvl")
 pub = rospy.Publisher("dvl", Vector3Stamped, queue_size=2)
 
-rate = rospy.Rate(10)
+rate = rospy.Rate(5)
 def callback(msg):
     global pub
     
@@ -20,12 +20,13 @@ def callback(msg):
     v3 = np.array([v.x,v.y,v.z]).transpose()
 
     #Find velocity in body frame
-    dvl_v = r.dot(v3)
+    # dvl_v = r.dot(v3)
+    dvl_v = [v.x, v.y, v.z]
 
     #Add Noise
-    dvl_x = dvl_v[0] + np.random.normal(0, scale=0.005)
-    dvl_y = dvl_v[1] + np.random.normal(0, scale=0.005)
-    dvl_z = dvl_v[2] + np.random.normal(0, scale=0.005)
+    dvl_x = dvl_v[0] + np.random.normal(0, scale=0.05)
+    dvl_y = dvl_v[1] + np.random.normal(0, scale=0.05)
+    dvl_z = dvl_v[2] + np.random.normal(0, scale=0.05)
 
 
     new_vel = Vector3(dvl_x, dvl_y, dvl_z)
@@ -33,7 +34,7 @@ def callback(msg):
     new_msg.vector = new_vel
     #get header set up
     new_msg.header.stamp = rospy.get_rostime()
-    new_msg.header.frame_id = rospy.get_namespace() + 'base_link'
+    # new_msg.header.frame_id = rospy.get_namespace() + 'base_link'
 
     pub.publish(new_msg)
     rate.sleep()
