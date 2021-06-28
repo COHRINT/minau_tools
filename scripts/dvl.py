@@ -10,7 +10,7 @@ import numpy as np
 rospy.init_node("dvl")
 pub = rospy.Publisher("dvl", TwistWithCovarianceStamped, queue_size=2)
 
-rate = rospy.Rate(10)
+rate = rospy.Rate(5)
 def callback(msg):
     global pub
     
@@ -22,12 +22,12 @@ def callback(msg):
 
     #Find velocity in body frame
     # dvl_v = r.dot(v3)
-    dvl_v = [0, 0, 0]
+    dvl_v = [v.x, v.y, v.z]
 
     #Add Noise
-    dvl_x = dvl_v[0] + np.random.normal(0, scale=0.005)
-    dvl_y = dvl_v[1] + np.random.normal(0, scale=0.005)
-    dvl_z = dvl_v[2] + np.random.normal(0, scale=0.005)
+    dvl_x = dvl_v[0] + np.random.normal(0, scale=0.05)
+    dvl_y = dvl_v[1] + np.random.normal(0, scale=0.05)
+    dvl_z = dvl_v[2] + np.random.normal(0, scale=0.05)
 
     new_vel = TwistWithCovarianceStamped()
     new_vel.twist.twist.linear = Vector3(dvl_x, dvl_y, dvl_z)
@@ -36,8 +36,8 @@ def callback(msg):
     new_vel.twist.covariance = list(cov.flatten())
 
     #get header set up
-    new_vel.header.stamp = rospy.get_rostime()
-    new_vel.header.frame_id = 'base_link'
+    new_msg.header.stamp = rospy.get_rostime()
+    # new_msg.header.frame_id = rospy.get_namespace() + 'base_link'
 
     pub.publish(new_vel)
     rate.sleep()
