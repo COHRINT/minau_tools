@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 
 import rospy
-
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Quaternion
 import tf
 import numpy as np
-from std_msgs.msg import Float64
+from nav_msgs.msg import Odometry
 
-def callback(msg):
-    global bias, pub
-
-    quat = msg.pose.pose.orientation
-
-    roll, pitch, yaw = tf.transformations.euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
+def callback(odom):
+    pose = odom.pose.pose
+    roll, pitch, yaw = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
     print(np.degrees(yaw))
 
-rospy.init_node("imu_echo")
-rospy.Subscriber("odometry/filtered/odom", Odometry, callback)
+rospy.init_node("odom_ori_echo")
+rospy.Subscriber("/odometry/filtered/odom", Odometry, callback)
 rospy.spin()
