@@ -15,7 +15,7 @@ def callback(float_msg):
     msg.header.frame_id = "odom"
     msg.header.seq = seq
 
-    msg.pose.pose.position.z = -float_msg.data
+    msg.pose.pose.position.z = float_msg.data
     cov = np.diag([-1,-1,0.1,-1,-1,-1])
     msg.pose.covariance = list(cov.flatten())
     pub.publish(msg)

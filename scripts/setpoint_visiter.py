@@ -38,17 +38,19 @@ print("armed...")
 current_index = 0
 
 # ENU setpoints
-setpoints = [[3,0],[3,3],[0,3],[0,0]]
+# setpoints = [[0,3],[3,3],[0,3],[0,0]]
+setpoints = [[7,0],[7,2],[2,2],[2,0],[0,0]]
 
 heading_setpoint = 90.0
 depth_setpoint = 1.0
 
 heading_setpoint = 90.0
-depth_setpoint = 0.6
+depth_setpoint = 0.5
 
 os.system("rosservice call /{}/uuv_control/set_heading_depth 'heading: ".format(actor) + str(heading_setpoint) + "\ndepth: "+str(depth_setpoint) + "'") 
 
 print("diving...")
+# sys.exit(0)
 
 r = rospy.Rate(1)
 
@@ -61,7 +63,10 @@ while not rospy.is_shutdown():
     diff_y = y_target - y_current
     ori = np.arctan2(diff_y, diff_x)
 
-    if np.abs(diff_x) < 1 and np.abs(diff_y) < 1:
+    total_dist = np.linalg.norm([diff_x, diff_y])
+
+    distance = 0.5
+    if total_dist < distance:
         current_index += 1
         print("###### ADVANCING WAYPOINT ######")
         if current_index >= len(setpoints):
@@ -70,7 +75,7 @@ while not rospy.is_shutdown():
             break
         continue
 
-    VEL = 0.2
+    VEL = 0.1 if total_dist < distance*4 else 0.2
     x_vel = VEL*np.cos(ori)
     y_vel = VEL*np.sin(ori)
 
