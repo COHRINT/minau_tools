@@ -39,7 +39,7 @@ current_index = 0
 
 # ENU setpoints
 # setpoints = [[0,3],[3,3],[0,3],[0,0]]
-setpoints = [[7,0],[7,2],[2,2],[2,0],[0,0]]
+setpoints = [[5,0],[5,5],[0,5],[0,0]]
 
 heading_setpoint = 90.0
 depth_setpoint = 1.0

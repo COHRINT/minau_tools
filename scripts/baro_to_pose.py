@@ -15,7 +15,7 @@ def callback(float_msg):
     msg.header.frame_id = "odom"
     msg.header.seq = seq
 
-    msg.pose.pose.position.z = float_msg.data
+    msg.pose.pose.position.z = float_msg.data - 0.7
     cov = np.diag([-1,-1,0.1,-1,-1,-1])
     msg.pose.covariance = list(cov.flatten())
     pub.publish(msg)
@@ -23,7 +23,8 @@ def callback(float_msg):
     seq += 1
 
 
-rospy.init_node("baro_repub")
+# rospy.init_node("baro_repub")
+rospy.init_node("baro_to_pose")
 rospy.Subscriber("mavros/global_position/rel_alt", Float64, callback)
 pub = rospy.Publisher("baro", PoseWithCovarianceStamped, queue_size=10)
 rospy.spin()
