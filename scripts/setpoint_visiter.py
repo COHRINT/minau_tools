@@ -7,9 +7,7 @@ import numpy as np
 import argparse
 import sys
 
-actor = "bluerov2_3"
-print(actor)
-
+actor = "bluerov2_5"
 pose = None
 
 def callback(msg):
@@ -35,11 +33,12 @@ print("armed...")
 current_index = 0
 
 # ENU setpoints
-setpoints = [[3,0],[3,3],[0,3],[0,0]]
+# setpoints = [[0,3],[3,3],[0,3],[0,0]]
+setpoints = [[5,0],[5,5],[0,5],[0,0]]
+# setpoints = [[7,0],[0,0]]
 
 heading_setpoint = 90.0
-depth_setpoint = 1.0
-
+depth_setpoint = 0.5
 
 os.system("rosservice call /{}/uuv_control/set_heading_depth 'heading: ".format(actor) + str(heading_setpoint) + "\ndepth: "+str(depth_setpoint) + "'") 
 
@@ -55,9 +54,12 @@ while not rospy.is_shutdown():
     diff_x = x_target - x_current
     diff_y = y_target - y_current
     ori = np.arctan2(diff_y, diff_x)
-    print("Traversing to waypoint: {}, current position: {}".format(setpoints[current_index], [x_current, y_current]))
+    # print("Traversing to waypoint: {}, current position: {}".format(setpoints[current_index], [x_current, y_current]))
 
-    if np.abs(diff_x) < 2 and np.abs(diff_y) < 2:
+    total_dist = np.linalg.norm([diff_x, diff_y])
+
+    distance = 0.5
+    if total_dist < distance:
         current_index += 1
         print("###### ADVANCING WAYPOINT ######")
         if current_index >= len(setpoints):
@@ -66,12 +68,12 @@ while not rospy.is_shutdown():
             break
         continue
 
-    VEL = 0.2
+    VEL = 0.1 if total_dist < distance*8 else 0.2
     x_vel = VEL*np.cos(ori)
     y_vel = VEL*np.sin(ori)
 
     # transform ENU --> NED
-    # x_vel, y_vel = y_vel, x_vel
+    x_vel, y_vel = y_vel, x_vel
     z_vel = 0.0
     cmd = "rosservice call /"+ actor + "/uuv_control/set_heading_velocity '{heading: "
     os.system(cmd + str(heading_setpoint) + ", velocity: {x: "+str(x_vel) + ", y: " + str(y_vel) + ", z: " + str(z_vel) + "}}'") 
