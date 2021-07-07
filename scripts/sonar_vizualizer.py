@@ -94,10 +94,10 @@ class Visualizer:
 
 
 	def blend_model(self,data):
-		THRESHOLD = 150
-		blend_data = [0.0] * (len(data)-20)
-		for i in range(len(data)-20):
-			blend_data[i] = data[i+20] + data[i+19] + data[i+18] + data[i+17] + data[i+16]
+		THRESHOLD = 100
+		blend_data = [0.0] * (len(data)-self.cutoff)
+		for i in range(len(data)-self.cutoff):
+			blend_data[i] = data[i+self.cutoff] + data[i+self.cutoff -1] + data[i+self.cutoff-2] + data[i+self.cutoff-3] + data[i+self.cutoff-4]
 			blend_data[i] = blend_data[i]/5
 			if blend_data[i] >= THRESHOLD:
 				return True
