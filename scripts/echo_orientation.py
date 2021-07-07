@@ -15,5 +15,5 @@ def callback(imu_msg):
     print(np.degrees(yaw))
 
 rospy.init_node("imu_echo")
-rospy.Subscriber("mavros/imu/data/corrected", Imu, callback)
+rospy.Subscriber("wit_imu", Imu, callback)
 rospy.spin()
