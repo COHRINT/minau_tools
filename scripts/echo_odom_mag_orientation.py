@@ -14,5 +14,5 @@ def callback(odom):
 
 actor = ""
 rospy.init_node("odom_ori_echo", anonymous=True)
-rospy.Subscriber("{}/odometry/filtered/odom_gyro".format(actor), Odometry, callback)
+rospy.Subscriber("{}/odometry/filtered/odom_madgwick".format(actor), Odometry, callback)
 rospy.spin()

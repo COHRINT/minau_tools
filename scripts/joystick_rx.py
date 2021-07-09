@@ -70,6 +70,8 @@ class MyController():
             self.heading_flag = True
             cmd = True
             heading_cmd = True
+            shd = rospy.ServiceProxy('uuv_control/set_heading_depth', SetHeadingDepth)
+            shd(self.heading, self.depth)
             
         elif msg.buttons[1] and not self.heading_flag:
             new_heading = self.heading + 15
@@ -82,6 +84,8 @@ class MyController():
             self.heading_flag = True
             cmd = True
             heading_cmd = True
+            shd = rospy.ServiceProxy('uuv_control/set_heading_depth', SetHeadingDepth)
+            shd(self.heading, self.depth)
         else:
             self.heading_flag = False
 
@@ -128,7 +132,7 @@ class MyController():
                 # shv(self.heading, vec)
 
         if cmd:
-            print("Heading: {} | Depth: {} | dx: {} | dy: {}".format(self.heading, -self.depth, dx, dy))
+            print("Heading: {} | Depth: {} | dx: {} | dy: {}".format(self.heading, -self.depth, self.dx, self.dy))
 
         
 if __name__ == "__main__":

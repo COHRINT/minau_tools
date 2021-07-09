@@ -7,12 +7,7 @@ import numpy as np
 import argparse
 import sys
 
-actor = "bluerov2_3"
-print(actor)
-
-#actor = args.actor
-#print(actor)
-actor = "bluerov2_3"
+actor = "bluerov2_5"
 pose = None
 
 def callback(msg):
@@ -39,10 +34,8 @@ current_index = 0
 
 # ENU setpoints
 # setpoints = [[0,3],[3,3],[0,3],[0,0]]
-setpoints = [[7,0],[7,2],[2,2],[2,0],[0,0]]
-
-heading_setpoint = 90.0
-depth_setpoint = 1.0
+setpoints = [[5,0],[5,5],[0,5],[0,0]]
+# setpoints = [[7,0],[0,0]]
 
 heading_setpoint = 90.0
 depth_setpoint = 0.5
@@ -50,7 +43,6 @@ depth_setpoint = 0.5
 os.system("rosservice call /{}/uuv_control/set_heading_depth 'heading: ".format(actor) + str(heading_setpoint) + "\ndepth: "+str(depth_setpoint) + "'") 
 
 print("diving...")
-# sys.exit(0)
 
 r = rospy.Rate(1)
 
@@ -62,6 +54,7 @@ while not rospy.is_shutdown():
     diff_x = x_target - x_current
     diff_y = y_target - y_current
     ori = np.arctan2(diff_y, diff_x)
+    # print("Traversing to waypoint: {}, current position: {}".format(setpoints[current_index], [x_current, y_current]))
 
     total_dist = np.linalg.norm([diff_x, diff_y])
 
@@ -75,7 +68,7 @@ while not rospy.is_shutdown():
             break
         continue
 
-    VEL = 0.1 if total_dist < distance*4 else 0.2
+    VEL = 0.1 if total_dist < distance*8 else 0.2
     x_vel = VEL*np.cos(ori)
     y_vel = VEL*np.sin(ori)
 
