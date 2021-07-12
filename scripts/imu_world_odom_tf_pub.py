@@ -9,8 +9,21 @@ Receives first imu message
 from sensor_msgs.msg import Imu
 import rospy
 import tf
+from geometry_msgs.msg import PoseWithCovarianceStamped
+import numpy as np
 
 rospy.init_node("imu_world_odom_tf_pub")
+
+pub = rospy.Publisher("set_pose", PoseWithCovarianceStamped, queue_size=10)
+
+msg = PoseWithCovarianceStamped()
+msg.header.stamp = rospy.get_rostime()
+msg.header.frame_id = "odom"
+cov = np.diag( [0.001,0.001, 0.1, 0.1, 0.1,0.1 ])
+msg.pose.covariance = list(cov.flatten())
+for i in range(5):
+	pub.publish(msg)
+	rospy.sleep(1)
 
 imu_msg_temp = None
 def callback(msg):
