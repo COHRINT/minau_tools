@@ -12,22 +12,25 @@ import tf
 
 rospy.init_node("imu_world_odom_tf_pub")
 
-imu_msg = None
+imu_msg_temp = None
 def callback(msg):
-    global imu_msg
-    imu_msg = msg
+    global imu_msg_temp
+    imu_msg_temp = msg
 
 rospy.Subscriber("imu/data", Imu, callback)
 rospy.wait_for_message("imu/data", Imu)
+imu_msg = imu_msg_temp
 
 br = tf.TransformBroadcaster()
 
-r = rospy.Rate(10)
+r = rospy.Rate(20)
 while not rospy.is_shutdown():
+    orientation = [imu_msg.orientation.x,imu_msg.orientation.y,imu_msg.orientation.z,imu_msg.orientation.w]
     br.sendTransform(
         (0,0,0),
-        imu_msg.orientation,
+        orientation,
         rospy.Time.now(),
-        "odom",
-        "imu_world")
+        "imu_world",
+        "base_link")
+    print("publishing---")
     r.sleep()

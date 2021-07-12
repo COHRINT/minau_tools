@@ -19,5 +19,6 @@ msg.header.stamp = rospy.get_rostime()
 msg.header.frame_id = "odom"
 cov = np.diag( [0.001,0.001, 0.1, 0.1, 0.1,0.1 ])
 msg.pose.covariance = list(cov.flatten())
-pub.publish(msg)
-
+for i in range(5):
+	pub.publish(msg)
+	rospy.sleep(1)

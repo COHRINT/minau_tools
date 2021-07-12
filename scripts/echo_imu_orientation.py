@@ -12,7 +12,7 @@ def callback(imu):
     print('RPY: ({:0.2f}, {:0.2f}, {:0.2f})'.format(np.degrees(roll), np.degrees(pitch), np.degrees(yaw)))
 
 
-actor = ""
+actor = "bluerov2_3"
 rospy.init_node("imu_echo")
 rospy.Subscriber("{}/imu/data".format(actor), Imu, callback)
 rospy.spin()
