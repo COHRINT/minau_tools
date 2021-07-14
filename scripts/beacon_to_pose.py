@@ -14,7 +14,7 @@ MEASUREMENT_COVARIANCE = 4
 rospy.init_node("beacon_to_pose")
 pub = rospy.Publisher("beacon_pose", PoseWithCovarianceStamped, queue_size=1)
 
-my_name = "dory"#rospy.get_namespace().replace("/","")
+rospy.get_namespace().replace("/","")
 
 def callback(msg):
     global pub, my_name, MEASUREMENT_COVARIANCE
