@@ -15,25 +15,29 @@ plan = args.plan
 
 
 if plan == "dory_1":
-	actor = "bluerov2_3"
-	setpoints = [[7,0]]
+    actor = "bluerov2_3"
+    loop = False
+    setpoints = [[7,0]]
 elif plan == "guppy_1":
-	actor = "bluerov2_5"
-	setpoints = [[7,-5]]
+    actor = "bluerov2_5"
+    loop = False
+    setpoints = [[7,-5]]
 elif plan == "dory_2":
-	actor = "bluerov2_3"
-	setpoints = [[7,0]]
+    actor = "bluerov2_3"
+    loop = False
+    setpoints = [[7,0]]
 elif plan == "guppy_2":
-	actor = "bluerov2_5"
-	setpoints = [[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8]]
+    actor = "bluerov2_5"
+    loop = True
+    setpoints = [[5,-4],[9,-4],[9,-8],[5,-8]]
 elif plan == "dory_3":
-	actor = "bluerov2_3"
-	setpoints = [[5,0],[9,0],[9,4],[5,4],[5,0],[9,0],[9,4],[5,4],[5,0],[9,0],[9,4],[5,4],[5,0],[9,0],[9,4],[5,4],[5,0],[9,0],[9,4],[5,4],[5,0],[9,0],[9,4],[5,4]]
+    actor = "bluerov2_3"
+    loop = True
+    setpoints = [[5,0],[9,0],[9,4],[5,4]]
 elif plan == "guppy_3":
-	actor = "bluerov2_5"
-	setpoints = [[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8],[5,-4],[9,-4],[9,-8],[5,-8]]
-
-
+    actor = "bluerov2_5"
+    loop = True
+    setpoints = [[5,-4],[9,-4],[9,-8],[5,-8]]
 
 
 # actor = "bluerov2_5"
@@ -54,6 +58,8 @@ rospy.init_node("setpoint_visiter", anonymous=True)
 #     rospy.wait_for_message("{}/strapdown/estimate".format(actor), Odometry)
 rospy.Subscriber("{}/odometry/filtered/odom".format(actor), Odometry, callback)
 rospy.wait_for_message("{}/odometry/filtered/odom".format(actor), Odometry)
+# rospy.Subscriber("{}/pose_gt".format(actor), Odometry, callback)
+# rospy.wait_for_message("{}/pose_gt".format(actor), Odometry)
 
 print("rosservice call /{}/uuv_control/arm_control ".format(actor) + "{}")
 os.system("rosservice call /{}/uuv_control/arm_control ".format(actor) + "{}")
@@ -73,7 +79,7 @@ os.system("rosservice call /{}/uuv_control/set_heading_depth 'heading: ".format(
 
 print("diving...")
 
-r = rospy.Rate(1)
+r = rospy.Rate(2)
 
 while not rospy.is_shutdown():
     x_target = setpoints[current_index][0]
@@ -92,9 +98,15 @@ while not rospy.is_shutdown():
         current_index += 1
         print("###### ADVANCING WAYPOINT ######")
         if current_index >= len(setpoints):
-            os.system("rosservice call /{}/uuv_control/disarm_control ".format(actor) + "{}")
             print("REACHED FINAL WAYPOINT")
-            break
+            if loop:
+                print("Looping")
+                current_index = 0
+            else:
+                current_index -= 1
+                rospy.sleep(1)
+            # os.system("rosservice call /{}/uuv_control/disarm_control ".format(actor) + "{}")
+            # break
         continue
 
     VEL = 0.1 if total_dist < distance*8 else 0.2
