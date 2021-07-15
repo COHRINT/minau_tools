@@ -7,15 +7,20 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 
 pub = None
 seq = 0
+depth_bias = None
 
 def callback(float_msg):
-    global pub, seq
+    global pub, seq, depth_bias
+
+    if depth_bias is None:
+        depth_bias = float_msg.data
+
     msg = PoseWithCovarianceStamped()
     msg.header.stamp = rospy.get_rostime()
     msg.header.frame_id = "odom"
     msg.header.seq = seq
 
-    msg.pose.pose.position.z = float_msg.data
+    msg.pose.pose.position.z = float_msg.data - depth_bias
     cov = np.diag([-1,-1,0.1,-1,-1,-1])
     msg.pose.covariance = list(cov.flatten())
     pub.publish(msg)
