@@ -9,7 +9,7 @@ from etddf_minau.msg import Measurement, MeasurementPackage
 from geometry_msgs.msg import PoseWithCovarianceStamped
 import numpy as np
 
-MEASUREMENT_COVARIANCE = 4
+MEASUREMENT_COVARIANCE = 8
 
 rospy.init_node("beacon_to_pose")
 pub = rospy.Publisher("beacon_pose", PoseWithCovarianceStamped, queue_size=1)
