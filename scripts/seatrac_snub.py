@@ -33,8 +33,8 @@ class SeatracSnub:
 
     def __init__(self, robot_names):
         self.poses = {}
-        self.poses["surface"] = Pose() # Assume surface beacon located (0,0,0)
-        self.poses["surface"].orientation.w = 1
+        self.poses["topside"] = Pose() # Assume topside beacon located (0,0,0)
+        self.poses["topside"].orientation.w = 1
         for r in robot_names:
             rospy.Subscriber(r + "/pose_gt", Odometry, callback = self.pose_callback, callback_args = r)
             rospy.wait_for_message(r + "/pose_gt", Odometry)
@@ -53,34 +53,38 @@ if __name__ == "__main__":
     # [comms_type, time_taken]
     # PING_DELAY = 2
     # BROADCAST_DELAY = 4
-    # comm_scheme = [["ping_surface_to_dory", PING_DELAY], ["ping_surface_to_guppy", PING_DELAY], ["broadcast_surface",BROADCAST_DELAY], ["broadcast_dory",BROADCAST_DELAY], ["broadcast_guppy",BROADCAST_DELAY]]
-    # COMPRESSION = True
+    # comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY], ["broadcast_bluerov2_3",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
+    COMPRESSION = True
 
-    PING_DELAY = 3.5
-    BROADCAST_DELAY = 1
+    PING_DELAY = 2.0
+    BROADCAST_DELAY = 3
     if comms == None:
-        comm_scheme = [["ping_surface_to_dory", PING_DELAY], ["ping_surface_to_guppy", PING_DELAY], ["broadcast_surface",BROADCAST_DELAY]]
+        comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY]] # Simple
+        # comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY], ["broadcast_bluerov2_3",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
+        
+        # Weird schedule
+        # comm_scheme = [["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
     else:
-        comm_scheme = [["broadcast_dory",BROADCAST_DELAY], ["broadcast_guppy",BROADCAST_DELAY]]
+        comm_scheme = [["broadcast_bluerov2_3",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
     print(comm_scheme)
 
 
-    asset_landmark_dict = {"surface" : 0, "dory":1, "guppy" : 2, "red_actor_5" : 3}
+    asset_landmark_dict = {"topside" : 0, "bluerov2_3":1, "bluerov2_4" : 2, "red_actor_5" : 3}
 
     event_pubs = {}
 
-    assets = ["dory", "guppy"]
+    assets = ["bluerov2_3", "bluerov2_4"]
     meas_pkg_pub_dict = {}
     for a in assets:
         meas_pkg_pub_dict[a] = rospy.Publisher(a + "/etddf/packages_in", MeasurementPackage, queue_size=10)
         event_pubs[a] = rospy.Publisher("/event_pubs/" + a, Int16, queue_size=10)
 
-    event_pubs["surface"] = rospy.Publisher("/event_pubs/surface", Int16, queue_size=10)
+    event_pubs["topside"] = rospy.Publisher("/event_pubs/topside", Int16, queue_size=10)
     seasnub = SeatracSnub(assets)
 
     curr_index = 0
 
-    surface_meas_pkg = MeasurementPackage()
+    topside_meas_pkg = MeasurementPackage()
     latest_meas_pkg = MeasurementPackage()
 
     while not rospy.is_shutdown():
@@ -105,33 +109,33 @@ if __name__ == "__main__":
             dist = np.linalg.norm([diff_x, diff_y, diff_z]) + np.random.normal(0, RANGE_SD)
             range_meas = Measurement("modem_range", t, action_executed_by, measured_asset, dist, RANGE_SD**2, GLOBAL_POSE, -1.0)
             
-            if "surface" in curr_action:
+            if "topside" in curr_action:
                 latest_meas_pkg.src_asset = action_executed_by
-                surface_meas_pkg.measurements.append(range_meas)
+                topside_meas_pkg.measurements.append(range_meas)
                 # include azimuth
                 # diff_x, diff_y = diff_y, diff_x # transform to NED in gazebo
                 # az_sd = ( 15*np.random.uniform() + 30 ) * (np.pi/180)
                 ang = np.arctan2(diff_y, diff_x) #+ np.random.normal(0, az_sd)
                 ang_deg = np.rad2deg(ang) + np.random.normal(0, AZIMUTH_SD)
                 az_meas = Measurement("modem_azimuth", t, action_executed_by, measured_asset, ang_deg, AZIMUTH_SD**2, GLOBAL_POSE, -1.0)
-                surface_meas_pkg.measurements.append(az_meas)
+                topside_meas_pkg.measurements.append(az_meas)
             else:
                 latest_meas_pkg.src_asset = action_executed_by
                 latest_meas_pkg.measrements.append(range_meas)
 
         elif "broadcast" in curr_action:
-            if "surface" in curr_action:
-                surface_meas_pkg.src_asset = "surface"
-                rospy.loginfo("surface broadcasting")
+            if "topside" in curr_action:
+                topside_meas_pkg.src_asset = "topside"
+                rospy.loginfo("topside broadcasting")
 
                 if COMPRESSION:
-                    bytes_ = measPkg2Bytes(surface_meas_pkg, asset_landmark_dict, NUM_BYTES)
-                    surface_meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
+                    bytes_ = measPkg2Bytes(topside_meas_pkg, asset_landmark_dict, NUM_BYTES)
+                    topside_meas_pkg = bytes2MeasPkg(bytes_, 0.0, asset_landmark_dict, GLOBAL_POSE)
 
-                event_pubs["surface"].publish(Int16())
+                event_pubs["topside"].publish(Int16())
                 for asset_key in meas_pkg_pub_dict.keys():
-                    meas_pkg_pub_dict[asset_key].publish(surface_meas_pkg)
-                surface_meas_pkg = MeasurementPackage()
+                    meas_pkg_pub_dict[asset_key].publish(topside_meas_pkg)
+                topside_meas_pkg = MeasurementPackage()
             else:
                 
                 agent = curr_action[len("broadcast_"):]

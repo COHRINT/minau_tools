@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description='Sonar Detection Model')
 parser.add_argument("plan", type=str, help="string representing specfic plan(ex:'dory_1')")
 args = parser.parse_args()
 plan = args.plan
+print(plan)
 
 
 if plan == "dory_1":
@@ -19,7 +20,7 @@ if plan == "dory_1":
     loop = False
     setpoints = [[7,0]]
 elif plan == "guppy_1":
-    actor = "bluerov2_5"
+    actor = "bluerov2_4"
     loop = False
     setpoints = [[7,-5]]
 elif plan == "dory_2":
@@ -27,7 +28,7 @@ elif plan == "dory_2":
     loop = False
     setpoints = [[7,0]]
 elif plan == "guppy_2":
-    actor = "bluerov2_5"
+    actor = "bluerov2_4"
     loop = True
     setpoints = [[5,-4],[9,-4],[9,-8],[5,-8]]
 elif plan == "dory_3":
@@ -35,12 +36,12 @@ elif plan == "dory_3":
     loop = True
     setpoints = [[5,0],[9,0],[9,4],[5,4]]
 elif plan == "guppy_3":
-    actor = "bluerov2_5"
+    actor = "bluerov2_4"
     loop = True
     setpoints = [[5,-4],[9,-4],[9,-8],[5,-8]]
 
 
-# actor = "bluerov2_5"
+# actor = "bluerov2_4"
 pose = None
 
 def callback(msg):
@@ -56,8 +57,10 @@ rospy.init_node("setpoint_visiter", anonymous=True)
 # else:
 #     rospy.Subscriber("{}/strapdown/estimate".format(actor), Odometry, callback)
 #     rospy.wait_for_message("{}/strapdown/estimate".format(actor), Odometry)
+print("Odom")
 rospy.Subscriber("{}/odometry/filtered/odom".format(actor), Odometry, callback)
 rospy.wait_for_message("{}/odometry/filtered/odom".format(actor), Odometry)
+print("Received msg")
 # rospy.Subscriber("{}/pose_gt".format(actor), Odometry, callback)
 # rospy.wait_for_message("{}/pose_gt".format(actor), Odometry)
 

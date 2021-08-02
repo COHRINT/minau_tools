@@ -10,21 +10,21 @@ from matplotlib.collections import PatchCollection
 import tf
 import sys
 
-ALL_ASSETS = ["guppy", "dory", "surface"]
+ALL_ASSETS = ["bluerov2_4", "bluerov2_3", "topside"]
 
 # ASSET_NAME = "bluerov2_3"
-# ASSET_NAME = "bluerov2_4"
+ASSET_NAME = "bluerov2_4"
 # MEASURED_NAME = ASSET_NAME
 # MEASURED_NAME = "bluerov2_4"
-# MEASURED_NAME = "bluerov2_3"
+MEASURED_NAME = "bluerov2_3"
 # MEASURED_NAME = "red_actor_5"
 
-ASSET_NAME = "guppy"
-# ASSET_NAME = "dory"
+# ASSET_NAME = "bluerov2_4"
+# ASSET_NAME = "bluerov2_3"
 # MEASURED_NAME = ASSET_NAME
-# MEASURED_NAME = "dory"
-# MEASURED_NAME = "guppy"
-MEASURED_NAME = "red_actor_5"
+# MEASURED_NAME = "bluerov2_3"
+# MEASURED_NAME = "bluerov2_4"
+# MEASURED_NAME = "red_actor_5"
 
 
 def get_plot_labels(num_states, num_ownship_states, asset_id):
@@ -247,12 +247,17 @@ def convert_numpy8(cov_msg):
     return x,P
 
 parser = argparse.ArgumentParser(description='Bag Analysis Node')
-parser.add_argument("-b", "--bag", type=str, help="Bag File to Analyze", required=True)
+# parser.add_argument("-b", "--bag", type=str, help="Bag File to Analyze", required=True)
 parser.add_argument("-e", "--etddf", type=bool, help="Analyze ETDDF (True) or Strapdown (False)",default=False, required=False)
 args = parser.parse_args()
 
+import glob
+import os
+list_of_files = glob.glob('*.bag')
+latest_file = max(list_of_files, key=os.path.getctime)
+print(latest_file)
 
-bag = rosbag.Bag(args.bag)
+bag = rosbag.Bag(latest_file)
 synced_3of3 = []
 synced_times = []
 last_pose_gt = None
@@ -266,7 +271,7 @@ if args.etddf == True:
     etddf_topic = '/'+ASSET_NAME + '/etddf/estimate/' + MEASURED_NAME
 else:
     assert ASSET_NAME == MEASURED_NAME
-    etddf_topic = '/'+ASSET_NAME + '/strapdown/estimate'
+    etddf_topic = '/'+ASSET_NAME + '/odometry/filtered/odom'
 print(etddf_topic)
 # etddf_topic = '/bluerov2_4/odometry/filtered'
 
@@ -274,7 +279,7 @@ all_topics = [etddf_topic, pose_gt_topic]
 all_topics.extend([ "/event_pubs/" + a for a in ALL_ASSETS])
 all_topics.extend(["/" + a +"/etddf/explicit_cnt" for a in ALL_ASSETS])
 all_topics.extend(["/" + a +"/etddf/implicit_cnt" for a in ALL_ASSETS])
-# /guppy/etddf/explicit_cnt
+# /bluerov2_4/etddf/explicit_cnt
 
 implicit_cnt, explicit_cnt = [], []
 
@@ -313,10 +318,10 @@ avg_latency = sum(avg_latency) / len(avg_latency)
 
 # if "surface" in event_pubs:
 #     event_pubs["surface"].pop(0)
-if "dory" not in event_pubs:
-    event_pubs["dory"] = []
-if "guppy" not in event_pubs:
-    event_pubs["guppy"] = []
+if "bluerov2_3" not in event_pubs:
+    event_pubs["bluerov2_3"] = []
+if "bluerov2_4" not in event_pubs:
+    event_pubs["bluerov2_4"] = []
 print(event_pubs)
 # sys.exit(0)
 
