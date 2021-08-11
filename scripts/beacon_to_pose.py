@@ -4,6 +4,7 @@
 This script converts the beacon measurement to a pose measurement that can be consumed by robot localization
 """
 
+from logging import error
 import rospy
 from etddf_minau.msg import Measurement, MeasurementPackage
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -41,10 +42,10 @@ def callback(msg):
         elif "range" in meas.meas_type:
             _range = meas.data
     if azimuth is None:
-        rospy.logerr("Azimuth data missing")
+        my_cuprint("Azimuth data missing", err=True)
         return
     if _range is None:
-        rospy.logerr("_range data missing")
+        my_cuprint("_range data missing", err=True)
         return
 
     position_x = _range * np.cos( azimuth ) + global_pose[0]
