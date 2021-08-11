@@ -99,7 +99,9 @@ def main(args):
     first_group = ["dory", "guppy"]
     second_group = ["bruce", "squirt", "bubbles"]
     comm_scheme = [['ping_{}_to_{}'.format(beacon_name, name), PING_DELAY] for name in first_group] + [["broadcast_wamv_1",BROADCAST_DELAY]]
+    comm_scheme += [['broadcast_{}'.format(name), PING_DELAY] for name in first_group]
     comm_scheme += [['ping_{}_to_{}'.format(beacon_name, name), PING_DELAY] for name in second_group] + [["broadcast_wamv_1",BROADCAST_DELAY]]
+    comm_scheme += [['broadcast_{}'.format(name), PING_DELAY] for name in second_group]
     # TODO add sharing of assets
 
     # if comms == None:
@@ -155,7 +157,6 @@ def main(args):
             range_meas = Measurement("modem_range", t, action_executed_by, measured_asset, dist, RANGE_SD**2, global_pose, -1.0)
 
             if beacon_name in curr_action:
-                print("Taking Azimuth Measurement")
                 latest_meas_pkg.src_asset = action_executed_by
                 wamv_1_meas_pkg.measurements.append(range_meas)
                 # include azimuth
