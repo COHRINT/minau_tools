@@ -32,7 +32,7 @@ def callback(msg):
             continue
         elif meas.src_asset != TOPSIDE_NAME:
             rospy.logerr("Expected src asset to be topside!! was: {}".format(meas.src_asset))
-            break
+            return
 
         if meas.meas_type == "modem_elevation":
             pass
@@ -42,10 +42,10 @@ def callback(msg):
         elif "range" in meas.meas_type:
             _range = meas.data
     if azimuth is None:
-        my_cuprint("Azimuth data missing", err=True)
+        my_cuprint("Azimuth data missing", warn=True)
         return
     if _range is None:
-        my_cuprint("_range data missing", err=True)
+        my_cuprint("_range data missing", warn=True)
         return
 
     position_x = _range * np.cos( azimuth ) + global_pose[0]
