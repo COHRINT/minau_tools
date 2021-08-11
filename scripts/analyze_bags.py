@@ -19,12 +19,24 @@ ASSET_NAME = "bluerov2_4"
 MEASURED_NAME = "bluerov2_3"
 # MEASURED_NAME = "red_actor_5"
 
-# ASSET_NAME = "bluerov2_4"
-# ASSET_NAME = "bluerov2_3"
-# MEASURED_NAME = ASSET_NAME
-# MEASURED_NAME = "bluerov2_3"
-# MEASURED_NAME = "bluerov2_4"
-# MEASURED_NAME = "red_actor_5"
+### NEW STUFF
+ALL_ASSETS = ["bruce", "dory", "guppy", "squirt", "bubbles"]
+ASSET_NAME = "bruce"
+MEASURED_NAME = "bruce"
+
+ASSET_NAME = "squirt"
+MEASURED_NAME = "squirt"
+
+# ASSET_NAME = "guppy"
+# MEASURED_NAME = "guppy"
+
+# ASSET_NAME = "bubbles"
+# MEASURED_NAME = "bubbles"
+
+# ASSET_NAME = "dory"
+# MEASURED_NAME = "dory"
+
+# MEASURED_NAME = "red1"
 
 
 def get_plot_labels(num_states, num_ownship_states, asset_id):
