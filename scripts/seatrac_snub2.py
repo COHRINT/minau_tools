@@ -90,18 +90,18 @@ def main(args):
     # PING_DELAY = 2
     # BROADCAST_DELAY = 4
     # comm_scheme = [["ping_wamv_1_to_bruce", PING_DELAY], ["ping_wamv_1_to_guppy", PING_DELAY], ["broadcast_wamv_1",BROADCAST_DELAY], ["broadcast_bruce",BROADCAST_DELAY], ["broadcast_guppy",BROADCAST_DELAY]]
-    COMPRESSION = True
+    # COMPRESSION = True
 
     PING_DELAY = 2.0
     BROADCAST_DELAY = 3.0
     # PING_DELAY = 1.0
     # BROADCAST_DELAY = 1.0
-    first_group = ["dory", "guppy"]
-    second_group = ["bruce", "squirt", "bubbles"]
+    first_group = ["dory", "guppy", "bruce"]
+    second_group = ["squirt", "bubbles"]
     comm_scheme = [['ping_{}_to_{}'.format(beacon_name, name), PING_DELAY] for name in first_group] + [["broadcast_wamv_1",BROADCAST_DELAY]]
-    comm_scheme += [['broadcast_{}'.format(name), PING_DELAY] for name in first_group]
+    # comm_scheme += [['broadcast_{}'.format(name), PING_DELAY] for name in first_group]
     comm_scheme += [['ping_{}_to_{}'.format(beacon_name, name), PING_DELAY] for name in second_group] + [["broadcast_wamv_1",BROADCAST_DELAY]]
-    comm_scheme += [['broadcast_{}'.format(name), PING_DELAY] for name in second_group]
+    # comm_scheme += [['broadcast_{}'.format(name), PING_DELAY] for name in second_group]
     # TODO add sharing of assets
 
     # if comms == None:
@@ -118,6 +118,7 @@ def main(args):
     asset_landmark_dict = {beacon_name : 0}
     for (i, name) in enumerate(blue_assets + red_assets):
         asset_landmark_dict[name] = i + 1
+    print(asset_landmark_dict)
 
     event_pubs = {}
 
