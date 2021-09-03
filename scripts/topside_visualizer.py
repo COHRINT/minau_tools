@@ -27,7 +27,7 @@ class Visualizer:
 
 		rospy.Subscriber("ping360_node/sonar/data",SonarEcho,self.data_callback)
 		rospy.Subscriber("sonar_processing/target_list",SonarTargetList,self.detection_callback)
-		self.image = np.zeros((IMAGE_HEIGHT, IMAGE_WIDTH, 3), np.uint8)
+		self.image = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), np.uint8) * 255
 		self.cache = copy.deepcopy(self.image)
 		self.bridge = CvBridge()
 
@@ -77,11 +77,16 @@ class Visualizer:
 					self.image[int(center[0] + x)][int(center[1] + y)
 												][0] = pointColor
 					self.image[int(center[0] + x)][int(center[1] + y)
-												][2] = 255-pointColor
+												][1] = pointColor
+					self.image[int(center[0] + x)][int(center[1] + y)
+												][2] = 0
+
 					self.cache[int(center[0] + x)][int(center[1] + y)
 												][0] = pointColor
 					self.cache[int(center[0] + x)][int(center[1] + y)
-												][2] = 255-pointColor
+												][1] = pointColor
+					self.cache[int(center[0] + x)][int(center[1] + y)
+												][2] = 0
 					
 		except IndexError:
 			rospy.logwarn(
