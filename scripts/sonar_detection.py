@@ -120,7 +120,7 @@ class Visualizer:
 				for s in range(self.step):
 					for k in range(self.SCAN_IMG_ROWS):
 						self.image[self.SCAN_IMG_ROWS*self.step*j + self.SCAN_IMG_ROWS*s + k][i][0] = pointColor
-						self.image[self.SCAN_IMG_ROWS*self.step*j + self.SCAN_IMG_ROWS*s + k][i][2] = 255 - pointColor
+						self.image[self.SCAN_IMG_ROWS*self.step*j + self.SCAN_IMG_ROWS*s + k][i][1] = pointColor
 		middle_angle = int(self.angle_queue[0][self.ANGLE_IDX] - (self.num_gradians/2.0))
 		self.publishImage(middle_angle)
 		return
