@@ -22,7 +22,9 @@ COMMS_ACTION_INDEX = 0
 COMMS_TIME_INDEX = 1
 
 RANGE_SD = 0.1
-AZIMUTH_SD = 5
+RANGE_BIAS = 0.65
+AZIMUTH_SD = 15
+AZIMUTH_BIAS = -45
 
 GLOBAL_POSE = [0,0,0,0]
 
@@ -56,10 +58,11 @@ if __name__ == "__main__":
     # comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY], ["broadcast_bluerov2_3",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
     COMPRESSION = True
 
-    PING_DELAY = 2.0
-    BROADCAST_DELAY = 3
+    PING_DELAY = 3.0
+    BROADCAST_DELAY = 3.0
     if comms == None:
         comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY]] # Simple
+        comm_scheme = [["ping_topside_to_guppy", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY]] # Simple
         # comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY], ["broadcast_bluerov2_3",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
         
         # Weird schedule
@@ -69,11 +72,13 @@ if __name__ == "__main__":
     print(comm_scheme)
 
 
-    asset_landmark_dict = {"topside" : 0, "bluerov2_3":1, "bluerov2_4" : 2, "red_actor_5" : 3}
+    # asset_landmark_dict = {"topside" : 0, "bluerov2_3":1, "bluerov2_4" : 2, "red_actor_5" : 3}
+    asset_landmark_dict = {"topside" : 0, "dory":1, "guppy" : 2, "red_actor_5" : 3}
 
     event_pubs = {}
 
-    assets = ["bluerov2_3", "bluerov2_4"]
+    # assets = ["bluerov2_3", "bluerov2_4"]
+    assets = ["dory", "guppy"]
     meas_pkg_pub_dict = {}
     for a in assets:
         meas_pkg_pub_dict[a] = rospy.Publisher(a + "/etddf/packages_in", MeasurementPackage, queue_size=10)
@@ -106,7 +111,7 @@ if __name__ == "__main__":
             diff_x =measured_asset_pose.position.x - action_executed_by_pose.position.x
             diff_y =measured_asset_pose.position.y - action_executed_by_pose.position.y
             diff_z =measured_asset_pose.position.z - action_executed_by_pose.position.z
-            dist = np.linalg.norm([diff_x, diff_y, diff_z]) + np.random.normal(0, RANGE_SD)
+            dist = np.linalg.norm([diff_x, diff_y, diff_z]) + np.random.normal(0, RANGE_SD) + RANGE_BIAS
             range_meas = Measurement("modem_range", t, action_executed_by, measured_asset, dist, RANGE_SD**2, GLOBAL_POSE, -1.0)
             
             if "topside" in curr_action:
@@ -116,7 +121,7 @@ if __name__ == "__main__":
                 # diff_x, diff_y = diff_y, diff_x # transform to NED in gazebo
                 # az_sd = ( 15*np.random.uniform() + 30 ) * (np.pi/180)
                 ang = np.arctan2(diff_y, diff_x) #+ np.random.normal(0, az_sd)
-                ang_deg = np.rad2deg(ang) + np.random.normal(0, AZIMUTH_SD)
+                ang_deg = np.rad2deg(ang) + np.random.normal(0, AZIMUTH_SD) + AZIMUTH_BIAS
                 az_meas = Measurement("modem_azimuth", t, action_executed_by, measured_asset, ang_deg, AZIMUTH_SD**2, GLOBAL_POSE, -1.0)
                 topside_meas_pkg.measurements.append(az_meas)
             else:

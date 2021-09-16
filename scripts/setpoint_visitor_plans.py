@@ -16,32 +16,32 @@ print(plan)
 
 
 if plan == "dory_1":
-    actor = "bluerov2_3"
+    actor = "dory"
     loop = False
     setpoints = [[7,0]]
 elif plan == "guppy_1":
-    actor = "bluerov2_4"
+    actor = "guppy"
     loop = False
     setpoints = [[7,-5]]
 elif plan == "dory_2":
-    actor = "bluerov2_3"
+    actor = "dory"
     loop = False
     setpoints = [[7,0]]
 elif plan == "guppy_2":
-    actor = "bluerov2_4"
+    actor = "guppy"
     loop = True
     setpoints = [[5,-4],[9,-4],[9,-8],[5,-8]]
 elif plan == "dory_3":
-    actor = "bluerov2_3"
+    actor = "dory"
     loop = True
     setpoints = [[5,0],[9,0],[9,4],[5,4]]
 elif plan == "guppy_3":
-    actor = "bluerov2_4"
+    actor = "guppy"
     loop = True
     setpoints = [[5,-4],[9,-4],[9,-8],[5,-8]]
 
 
-# actor = "bluerov2_4"
+# actor = "guppy"
 pose = None
 
 def callback(msg):
@@ -57,12 +57,12 @@ rospy.init_node("setpoint_visiter", anonymous=True)
 # else:
 #     rospy.Subscriber("{}/strapdown/estimate".format(actor), Odometry, callback)
 #     rospy.wait_for_message("{}/strapdown/estimate".format(actor), Odometry)
-print("Odom")
-rospy.Subscriber("{}/odometry/filtered/odom".format(actor), Odometry, callback)
-rospy.wait_for_message("{}/odometry/filtered/odom".format(actor), Odometry)
-print("Received msg")
-# rospy.Subscriber("{}/pose_gt".format(actor), Odometry, callback)
-# rospy.wait_for_message("{}/pose_gt".format(actor), Odometry)
+# print("Odom")
+# rospy.Subscriber("{}/odometry/filtered/odom".format(actor), Odometry, callback)
+# rospy.wait_for_message("{}/odometry/filtered/odom".format(actor), Odometry)
+# print("Received msg")
+rospy.Subscriber("{}/pose_gt".format(actor), Odometry, callback)
+rospy.wait_for_message("{}/pose_gt".format(actor), Odometry)
 
 print("rosservice call /{}/uuv_control/arm_control ".format(actor) + "{}")
 os.system("rosservice call /{}/uuv_control/arm_control ".format(actor) + "{}")
