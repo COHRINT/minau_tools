@@ -1,0 +1,98 @@
+<launch>
+
+    <arg name="red_team_names" value="[]"/>
+    <arg name="x_3" value="5"/>
+    <arg name="y_3" value="5"/>
+    <arg name="z_3" value="0"/>
+    <arg name="yaw_enu_3" value="0.0"/>
+    <arg name="starting_odom_enu_3" value="[$(arg x_3), $(arg y_3), $(arg z_3),
+                                    0, 0, $(arg yaw_enu_3),
+                                    0, 0, 0,
+                                    0, 0, 0
+                                    0, 0, 0]"/>
+
+
+    <arg name="x_4" value="-5"/>
+    <arg name="y_4" value="-5"/>
+    <arg name="z_4" value="0"/>
+    <arg name="yaw_enu_4" value="0.0"/>
+    <arg name="starting_odom_enu_4" value="[$(arg x_4), $(arg y_4), $(arg z_4),
+                                    0, 0, $(arg yaw_enu_4),
+                                    0, 0, 0,
+                                    0, 0, 0
+                                    0, 0, 0]"/>
+
+    <arg name="position_3_enu" value="[$(arg x_3), $(arg y_3), $(arg z_3)]"/>
+    <arg name="position_4_enu" value="[$(arg x_4), $(arg y_4), $(arg z_4)]"/>
+    <arg name="landmark_file" default="$(find etddf_minau)/config/landmarks_dummy.yaml" />
+    <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_3_assets.json"/>
+    <arg name="quantization_enabled" default="true"/>
+    <arg name="surface_beacon_pose_ned" default="[0.0, 0.0, 0.0, 0.0]"/>
+
+
+    <!-- <node pkg="minau_tools" type="seatrac_snub.py" name="seatrac_snub" output="screen" />-->
+
+
+
+
+    <group ns="bluerov2_3">
+        <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se_odom" clear_params="true">
+            <rosparam command="load" file="$(find minau)/params/odom_template.yaml" />
+            <remap from="odometry/filtered" to="odometry/filtered/odom"/>
+            <rosparam param="initial_state" subst_value="True">$(arg starting_odom_enu_3)</rosparam>
+        </node>
+
+        <node name="set_rl_pose" pkg="minau_tools" type="set_robot_localization_pose.py" output="screen">
+            <param name="x" value="$(arg x_3)" />
+            <param name="y" value="$(arg y_3)" />
+            <param name="z" value="$(arg z_3)" />
+            <param name="starting_yaw" value="$(arg yaw_enu_3)" />
+        </node>
+
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="bluerov2_3"/>
+            <arg name="blue_team_names" value="[bluerov2_4]"/>
+            <arg name="blue_team_positions_enu" value="[$(arg position_4_enu)]"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg position_3_enu)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+        </include>
+
+        <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
+            <param name="rate" value="20.0"/>
+            <param name="use_truth" value="True" />
+        </node>
+    </group>
+
+    <group ns="bluerov2_4">
+        <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se_odom" clear_params="true">
+            <rosparam command="load" file="$(find minau)/params/odom_template.yaml" />
+            <remap from="odometry/filtered" to="odometry/filtered/odom"/>
+            <rosparam param="initial_state" subst_value="True">$(arg starting_odom_enu_4)</rosparam>
+        </node>
+
+        <node name="set_rl_pose" pkg="minau_tools" type="set_robot_localization_pose.py" output="screen">
+            <param name="x" value="$(arg x_4)" />
+            <param name="y" value="$(arg y_4)" />
+            <param name="z" value="$(arg z_4)" />
+            <param name="starting_yaw" value="$(arg yaw_enu_4)" />
+        </node>
+
+        <include file="$(find etddf_minau)/launch/etddf.launch">
+            <arg name="my_name" value="bluerov2_4"/>
+            <arg name="blue_team_names" value="[bluerov2_3]"/>
+            <arg name="blue_team_positions_enu" value="[$(arg position_3_enu)]"/>
+            <arg name="red_team_names" value="$(arg red_team_names)" />
+            <arg name="starting_position_enu" value="$(arg position_4_enu)" />
+            <arg name="landmark_file" value="$(arg landmark_file)" />
+        </include>
+
+        <node name="uuv_control" pkg="minau" type="uuv_control_node.py" output="screen">
+            <param name="config" value="$(find minau)/config/uuv_control/vehicle.sitl.json"/>
+            <param name="rate" value="20.0"/>
+            <param name="use_truth" value="True" />
+        </node>
+    </group>
+
+</launch>

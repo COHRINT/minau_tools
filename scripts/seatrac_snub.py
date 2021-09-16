@@ -58,7 +58,8 @@ if __name__ == "__main__":
 
     PING_DELAY = 2.0
     BROADCAST_DELAY = 3
-    if comms == None:
+    #if comms == True:
+    if True:
         comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY]] # Simple
         # comm_scheme = [["ping_topside_to_bluerov2_3", PING_DELAY], ["ping_topside_to_bluerov2_4", PING_DELAY], ["broadcast_topside",BROADCAST_DELAY], ["broadcast_bluerov2_3",BROADCAST_DELAY], ["broadcast_bluerov2_4",BROADCAST_DELAY]]
         

@@ -1,0 +1,139 @@
+<launch>
+  <arg name="ardusub_params" default="$(find minau)/config/ardusub_sitl_no_gps.param"/>
+
+  <!-- Start Gazebo Simulator with open ocean world -->
+  <arg name="latitude" default="56.71897669633431"/>
+  <arg name="longitude" default="3.515625"/>
+
+  <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_1_assets.json"/>
+  <arg name="red_plan_filename" default="$(find minau)/config/mission_description_red_asset_3.xml"/>
+
+  <include file="$(find uuv_gazebo_worlds)/launch/ocean_waves.launch">
+    <arg name="paused" value="true"/>
+  </include>
+
+  <!-- Asset 3 Starting Position -->
+  <arg name="x_3" value="8.0"/>
+  <arg name="y_3" value="0.0"/>
+  <arg name="z_3" value="0.0"/>
+  <arg name="starting_position_3" value="[$(arg x_3), $(arg y_3), $(arg z_3)]"/>
+  <!-- Asset 4 Starting Position -->
+  <arg name="x_4" value="3.0"/>
+  <arg name="y_4" value="0.0"/>
+  <arg name="z_4" value="0.0"/>
+  <arg name="starting_position_4" value="[$(arg x_4), $(arg y_4), $(arg z_4)]"/>
+  <!-- Asset 4 Starting Position -->
+  <arg name="x_5" value="0.0"/>
+  <arg name="y_5" value="8.0"/>
+  <arg name="z_5" value="0.0"/>
+
+  <!-- Pier location in ENU -->
+  <arg name="pier_x" default="-3.0"/>
+  <arg name="pier_y" default="-11.0"/>
+  <arg name="pier_z" default="-7.0"/>
+  <arg name="pier_yaw" default="0.0"/>
+
+  <!-- Pole location in ENU -->
+  <arg name="pole_x" default="-1.5"/>
+  <arg name="pole_y" default="12.0"/>
+  <arg name="pole_z" default="-5.0"/>
+  <arg name="surface_beacon_pose_ned" default="[$(arg pole_x), $(arg pole_y), $(arg pole_z), 0.0]" />
+
+
+  <arg name="is_landmark" default="true"/>
+  <arg name="use_360" default="true"/>
+
+  <!-- Spawn WAM-V mothership model in the simulated environment -->
+  <!-- <include file="$(find minau_tools)/launch/vehicle.wamv.sitl.launch">
+    <arg name="asset_id" value="1"/>
+    <arg name="ardusub_instance" value="5"/>
+    <arg name="ardusub_params" value="$(arg ardusub_params)"/>
+    <arg name="latitude" value="$(arg latitude)"/>
+    <arg name="longitude" value="$(arg longitude)"/> -->
+    <!-- The following arguments must be set w.r.t. NED world frame -->
+    <!-- <arg name="x" value="0.0"/>
+    <arg name="y" value="0.0"/>
+    <arg name="z" value="0.2"/>
+    <arg name="roll" value="0.0"/>
+    <arg name="pitch" value="0.0"/>
+    <arg name="yaw" value="0.0"/>
+
+    <arg name="schedule_file" value="$(arg schedule_file)"/> -->
+    <!-- DDF params -->
+    <!-- <arg name="blue_team_names" value="[bluerov2_3, bluerov2_4]" />
+    <arg name="blue_team_positions" value="[$(arg starting_position_3), $(arg starting_position_4)]"/>
+    <arg name="surface_beacon_pose_ned" value="$(arg surface_beacon_pose_ned)"/>
+  </include> -->
+
+  <!-- <node name="spawn_pier" pkg="gazebo_ros" type="spawn_model" args="-file $(find etddf_minau)/models/pier/model.sdf -sdf -model pier -z $(arg pier_z) -x $(arg pier_x) -y $(arg pier_y) -Y $(arg pier_yaw)"/> -->
+  <!-- Spawn BlueROV2 model in the simulated environment -->
+  <include file="$(find minau_tools)/launch/vehicle.bluerov2.sitl.launch">
+    <arg name="asset_id" value="3"/>
+    <arg name="ardusub_instance" value="0"/>
+    <arg name="ardusub_params" value="$(arg ardusub_params)"/>
+    <arg name="latitude" value="$(arg latitude)"/>
+    <arg name="longitude" value="$(arg longitude)"/> -->
+    <!-- The following arguments must be set w.r.t. NED world frame -->
+    <arg name="x" value="$(arg x_3)"/>
+    <arg name="y" value="$(arg y_3)"/>
+    <arg name="z" value="$(arg z_3)"/>
+    <arg name="roll" value="0.0"/>
+    <arg name="pitch" value="0.0"/>
+    <arg name="yaw" value="1.57"/>
+
+    <arg name="use_360" value="$(arg use_360)"/>
+
+    <arg name="schedule_file" value="$(arg schedule_file)"/>
+    <!-- DDF params -->
+    <arg name="blue_team_names" value="[bluerov2_4]" />
+    <arg name="blue_team_positions" value="[$(arg starting_position_4)]"/>
+    <arg name="surface_beacon_pose_ned" value="$(arg surface_beacon_pose_ned)"/>
+  </include>
+
+  <include file="$(find minau_tools)/launch/vehicle.bluerov2.sitl.launch">
+    <arg name="asset_id" value="4"/>
+    <arg name="ardusub_instance" value="1"/>
+    <arg name="ardusub_params" value="$(arg ardusub_params)"/>
+    <arg name="latitude" value="$(arg latitude)"/>
+    <arg name="longitude" value="$(arg longitude)"/>
+    <!-- The following arguments must be set w.r.t. NED world frame -->
+    <arg name="x" value="$(arg x_4)"/>
+    <arg name="y" value="$(arg y_4)"/>
+    <arg name="z" value="$(arg z_4)"/>
+    <arg name="roll" value="0.0"/>
+    <arg name="pitch" value="0.0"/>
+    <arg name="yaw" value="-1.57"/>
+
+    <arg name="use_360" value="$(arg use_360)"/>
+
+    <arg name="schedule_file" value="$(arg schedule_file)"/>
+    <!-- DDF params -->
+    <arg name="blue_team_names" value="[bluerov2_3]" />
+    <arg name="blue_team_positions" value="[$(arg starting_position_3)]"/>
+    <arg name="surface_beacon_pose_ned" value="$(arg surface_beacon_pose_ned)"/>
+  </include>
+
+  <include file="$(find minau)/launch/vehicle.red_actor.sitl.launch">
+      <arg name="asset_id" value="5"/>
+      <arg name="ardusub_instance" default="2"/>
+      <arg name="x" value="$(arg x_5)"/>
+      <arg name="y" value="$(arg y_5)"/>
+      <arg name="z" value="$(arg z_5)"/>
+      <arg name="roll" value="0.0"/>
+      <arg name="pitch" value="0.0"/>
+      <arg name="yaw" value="-1.57"/>
+
+      <arg name="plan_filename" value="$(arg red_plan_filename)"/>
+  </include>
+
+  <!-- <node name="spawn_pole" pkg="gazebo_ros" type="spawn_model" args="-file $(find minau)/models/lamp_post/model.sdf -sdf -model pole -z $(arg pole_z) -x $(arg pole_x) -y $(arg pole_y)"/> -->
+  <node name="spawn_pier" pkg="gazebo_ros" type="spawn_model" args="-file $(find minau)/models/pier/model.sdf -sdf -model pier -z $(arg pier_z) -x $(arg pier_x) -y $(arg pier_y) -Y $(arg pier_yaw)"/>
+  
+  <node name="namespace_node" pkg="minau" type="namespace_provider_node.py" output="screen">
+    <param name="red_filter" value="red_actor_([^/]+)"/>
+    <param name="blue_filter" value="bluerov2_([^/]+)"/>
+  </node>
+</launch>
+
+
+

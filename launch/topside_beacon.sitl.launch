@@ -1,0 +1,70 @@
+<launch>
+
+  <arg name="asset_id" default="1"/>
+  <arg name="namespace" default="surface"/>
+
+  <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_1_assets.json"/>
+  <arg name="quantization_enabled" default="true"/>
+
+  <!-- If true, Surface Communication will obtain its global position from the simulation /pose_gt -->
+  <arg name="sim_global_pose" default="false"/>
+  <arg name="sim_modem_type" default="x150"/>
+
+  <arg name="surface_beacon_pose_ned" default="[]"/>
+  <arg name="surface_position_enu"/>
+  <arg name="beacon_pose_pitch" default="0.0"/>
+  <arg name="beacon_pose_roll" default="0.0"/>
+
+  <!-- DDF params -->
+  <arg name="blue_team_names" default="[]"/>
+  <arg name="blue_team_positions" default="[]" />
+  <arg name="red_team_names" default="[]"/>
+  <arg name="landmark_file" default="$(find etddf_minau)/config/landmarks_dummy.yaml" />
+
+  <!-- Serial interface device for-->
+  <arg name="beacon_dev" default="/dev/ttyUSB0" />
+
+  <group ns="$(arg namespace)">
+
+    <param name="asset_id" value="$(arg asset_id)"/>
+    <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+
+    <include file="$(find seatrac_driver)/launch/seatrac_driver.launch">
+      <arg name="sim" value="true"/>
+      <arg name="rate" value="20.0"/>
+      <arg name="device" value="$(arg beacon_dev)"/>
+      <arg name="baudrate" value="115200"/>
+
+      <arg name="sim_pose_src" value="args"/>
+      <arg name="beacon_pose_ned" value="$(arg surface_beacon_pose_ned)"/>
+      <arg name="beacon_pose_pitch" value="$(arg beacon_pose_pitch)"/>
+      <arg name="beacon_pose_roll" value="$(arg beacon_pose_roll)"/>
+      <arg name="sim_modem_type" value="$(arg sim_modem_type)" />
+    </include>
+
+    <include file="$(find etddf_minau)/launch/etddf.launch">
+      <arg name="my_name" value="$(arg namespace)"/>
+      <arg name="blue_team_names" value="$(arg blue_team_names)"/>
+      <arg name="blue_team_positions_enu" value="$(arg blue_team_positions)"/>
+      <arg name="red_team_names" value="$(arg red_team_names)" />
+      <arg name="starting_position_enu" value="$(arg surface_position_enu)" />
+      <arg name="landmark_file" value="$(arg landmark_file)" />
+    </include>
+
+    <!-- Start the Surface Modem Processing node -->
+    <node name="surface_communication" pkg="minau" type="surface_communication_node.py" output="screen">
+      <param name="rate" value="2.0"/>
+      <param name="schedule_period_sec" value="20"/>
+      <param name="asset_ping_period_sec" value="8"/>
+      <param name="schedule_file" value="$(arg schedule_file)"/>
+      <param name="sim_global_pose" value="$(arg sim_global_pose)"/>
+
+      <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+
+      <param name="az_scalar" value="1.0"/>
+      <param name="schedule_enabled" value="true"/>
+      <param name="quantization_enabled" value="$(arg quantization_enabled)"/>
+    </node>
+  </group>
+
+</launch>

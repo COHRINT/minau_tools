@@ -1,0 +1,74 @@
+<launch>
+  <arg name="asset_id" default="0"/>
+  <arg name="ardusub_instance" default="0"/>
+  <arg name="ardusub_params" default="$(find minau)/config/ardusub_sitl_no_gps.param"/>
+  <arg name="latitude" default="0.0"/>
+  <arg name="longitude" default="0.0"/>
+  <!-- xyz and rpy to be defined in NED coordinate frame -->
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.0"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+  <arg name="schedule_file" default="$(find minau)/config/schedules/schedule_3_assets.json"/>
+
+  <!-- DDF params -->
+  <arg name="blue_team_names" default="[]"/>
+  <arg name="blue_team_positions" default="[]" />
+  <arg name="red_team_names" default="[]"/>
+
+  <arg name="surface_beacon_pose_ned" default="[0.0, 0.0, 0.0, 0.0]"/>
+
+  <group ns="wamv_$(arg asset_id)">
+    <param name="asset_id" value="$(arg asset_id)"/>
+
+    <!-- Spawn WAM-V 16 model in the simulated environment (in ENU world frame) -->
+    <include file="$(find wamv)/launch/upload_wamv.launch">
+      <arg name="x" value="$(arg y)"/>
+      <arg name="y" value="$(arg x)"/>
+      <arg name="z" value="$(eval -z)"/>
+      <arg name="roll" value="$(arg roll)"/>
+      <arg name="pitch" value="$(arg pitch)"/>
+      <arg name="yaw" value="$(eval yaw + 1.570796)"/>
+      <arg name="mode" value="default"/>
+      <arg name="namespace" value="wamv_$(arg asset_id)"/>
+    </include>
+
+    <!-- Start the MAVROS node for this vehicle instance -->
+    <include file="$(find minau)/launch/mavros.launch">
+      <arg name="fcu_url" value="$(eval 'udp://0.0.0.0:'+str(14550 + 10 * ardusub_instance)+'@127.0.0.1:'+str(14555 + 10 * ardusub_instance))"/>
+    </include>
+
+    <!-- TODO (EBS): Start the SeaTrac (simulation) driver node -->
+    <include file="$(find seatrac_driver)/launch/seatrac_driver.launch">
+      <arg name="sim" value="true"/>
+      <arg name="sim_comms_drop" value="false"/>
+      <arg name="sim_tx_rate" value="false"/>
+      <arg name="sim_modem_type" value="x150"/>
+      <arg name="beacon_pose_ned" value="$(arg surface_beacon_pose_ned)"/>
+    </include>
+
+    <!-- Start the SIMULATED Modem Processing node -->
+    <node name="surface_communication" pkg="minau" type="surface_communication_node.py" output="screen">
+      <param name="rate" value="10.0"/>
+      <param name="schedule_period_sec" value="20"/>
+      <param name="asset_ping_period_sec" value="8"/>
+      <param name="schedule_file" value="$(arg schedule_file)"/>
+      <param name="sim_asset_file" value="true"/>
+      <param name="sim_global_pose" value="true"/>
+      <param name="global_pose_x" value="0.0"/>
+      <param name="global_pose_y" value="0.0"/>
+      <param name="global_pose_z" value="0.0"/>
+      <param name="global_pose_yaw" value="1.57"/>
+      <param name="az_scalar" value="-1.0"/>
+      <rosparam param="surface_beacon_pose_ned" subst_value="True">$(arg surface_beacon_pose_ned)</rosparam>
+    </node>
+
+    <!-- Define map to world transform (identity)-->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_world_tf_publisher"
+          args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 map world"/>
+  </group>
+</launch>
+
+
