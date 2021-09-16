@@ -43,8 +43,8 @@ class repeatTester:
             self.config.append(row)
         
         self.first_bruce = [5,5,-1]
-        self.first_guppy = [5,0,-1]
-        self.first_dory = [-5,0,-1]
+        self.first_3 = [5,0,-1]
+        self.first_4 = [-5,0,-1]
         self.red_vel = 0.5
         self.blue_vel = 0.3
         self.debug = rospy.get_param("~debug",False)
@@ -90,8 +90,8 @@ class repeatTester:
         """
         if self.num_assets == 3:
             set_model_state('bruce',self.first_bruce)
-        set_model_state('guppy',self.first_guppy)
-        set_model_state('dory',self.first_dory)
+        set_model_state('bluerov2_4',self.first_4)
+        set_model_state('bluerov2_3',self.first_3)
         set_model_state('red_actor_5',self.first_red)
 
     def run(self):
@@ -114,24 +114,32 @@ class repeatTester:
                 args3 = ['rosrun','minau_tools','waypoint_move.py','__ns:=red_actor_5','_vel:='+str(self.red_vel),'_red:=true','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-3']
 
                 pose_bruce = 'pose_bruce:='+str(self.first_bruce)
-                pose_guppy = 'pose_guppy:='+str(self.first_guppy)
-                pose_dory = 'pose_dory:='+str(self.first_dory)
-                args1 = ['roslaunch','minau_tools','uuv_etddf3.launch',pose_bruce,pose_guppy,pose_dory]
-                args2 = ['roslaunch','minau_tools','uuv_etddf.launch',pose_guppy,pose_dory]
+                pose_4 = 'pose_4:='+str(self.first_4)
+                pose_3 = 'pose_3:='+str(self.first_3)
+
+                x_3 = "x_3:=" + str(self.first_3[0])
+                y_3 = "y_3:=" + str(self.first_3[1])
+                z_3 = "z_3:=" + str(self.first_3[2])
+                x_4 = "x_4:=" + str(self.first_4[0])
+                y_4 = "y_4:=" + str(self.first_4[1])
+                z_4 = "z_4:=" + str(self.first_4[2])
+
+                args1 = ['roslaunch','minau_tools','uuv_etddf3.launch',pose_bruce,pose_3,pose_4]
+                args2 = ['roslaunch','minau_tools','uuv_etddf.launch',x_3,y_3,z_3,x_4,y_4,z_4]
 
 
-                args4 = ['rosrun','minau_tools','waypoint_move.py','__ns:=guppy','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-1']
-                args5 = ['rosrun','minau_tools','waypoint_move.py','__ns:=dory','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-2']
+                args4 = ['rosrun','minau_tools','waypoint_move.py','__ns:=bluerov2_3','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-1']
+                args5 = ['rosrun','minau_tools','waypoint_move.py','__ns:=bluerov2_4','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-2']
                 if self.num_assets==3:
                     args7 = ['rosrun','minau_tools','waypoint_move.py','__ns:=bruce','_vel:='+str(self.blue_vel),'_red:=false','_dimx:='+str(self.dim_x),'_dimy:='+str(self.dim_y),'_z:=-2']
 
 
                 bagfile_name = self.config_names[j]+'_'+str(i+1)
-                args6 = 'rosbag record -O '+bagfile_name+' /guppy/pose_gt \
-                                                           /dory/pose_gt \
+                args6 = 'rosbag record -O '+bagfile_name+' /bluerov2_3/pose_gt \
+                                                           /bluerov2_4/pose_gt \
                                                            /red_actor_5/pose_gt \
-                                                           /guppy/etddf/estimate/network \
-                                                           /dory/etddf/estimate/network'
+                                                           /bluerov2_4/etddf/estimate/network \
+                                                           /bluerov2_3/etddf/estimate/network'
                 if self.num_assets == 3: 
                     args6 = 'rosbag record -O '+bagfile_name+' /guppy/pose_gt \
                                                            /dory/pose_gt \

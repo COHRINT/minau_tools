@@ -1,10 +1,9 @@
 <launch>
-
     <arg name="red_team_names" value="[]"/>
-    <arg name="x_3" value="5"/>
-    <arg name="y_3" value="5"/>
-    <arg name="z_3" value="0"/>
-    <arg name="yaw_enu_3" value="0.0"/>
+    <arg name="x_3" default="5"/>
+    <arg name="y_3" default="5"/>
+    <arg name="z_3" default="0"/>
+    <arg name="yaw_enu_3" value="1.57"/>
     <arg name="starting_odom_enu_3" value="[$(arg x_3), $(arg y_3), $(arg z_3),
                                     0, 0, $(arg yaw_enu_3),
                                     0, 0, 0,
@@ -12,10 +11,10 @@
                                     0, 0, 0]"/>
 
 
-    <arg name="x_4" value="-5"/>
-    <arg name="y_4" value="-5"/>
-    <arg name="z_4" value="0"/>
-    <arg name="yaw_enu_4" value="0.0"/>
+    <arg name="x_4" default="-5"/>
+    <arg name="y_4" default="-5"/>
+    <arg name="z_4" default="0"/>
+    <arg name="yaw_enu_4" value="1.57"/>
     <arg name="starting_odom_enu_4" value="[$(arg x_4), $(arg y_4), $(arg z_4),
                                     0, 0, $(arg yaw_enu_4),
                                     0, 0, 0,
