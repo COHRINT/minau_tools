@@ -1,0 +1,21 @@
+mission_config:
+  surface_beacon_name: topside
+  surface_beacon_position: [0,0,0]
+  baro:
+    bias: 0.0
+    var: 0.1
+  dvl_x:
+    bias: 0.0
+    var: 0.1
+  dvl_y:
+    bias: 0.0
+    var: 0.1
+  dvl_z:
+    bias: 0.0
+    var: 0.1
+  modem_az:
+    bias: 0.0
+    var: 0.1
+  modem_range:
+    bias: 0.0
+    var: 0.1

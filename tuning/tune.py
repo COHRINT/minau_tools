@@ -18,6 +18,7 @@ import rospy
 from rospy.client import init_node
 import tf
 import numpy as np
+import yaml
 
 from std_msgs.msg import Float64
 from geometry_msgs.msg import TwistWithCovarianceStamped
@@ -127,7 +128,51 @@ print("Jump on the surface modem a few times to simulate waves\n")
 s = Subber(args.name)
 rospy.sleep(args.time)
 
-print("*"*10 + "\n")
+# Produce the yaml file
+try:
+    yaml_obj = {
+        "surface_beacon_name" : "topside",
+        "surface_beacon_position" : [0,0, args.depth],
+        "baro" : 
+            {
+                "bias" : float( np.mean( np.array(s.baro_msgs) ) ),
+                "var" : float( np.var( np.array(s.baro_msgs) ) )
+            },
+        "dvl_x" : 
+            {
+                "bias" : float( np.mean(np.array(s.dvl_x_msgs)) ),
+                "var" : float( np.var(np.array(s.dvl_x_msgs)) )
+            },
+        "dvl_y" : 
+            {
+                "bias" : float( np.mean(np.array(s.dvl_y_msgs)) ),
+                "var" : float( np.var(np.array(s.dvl_y_msgs)) )
+            },
+        "dvl_z" : 
+            {
+                "bias" : float( np.mean(np.array(s.dvl_z_msgs)) ),
+                "var" : float( np.var(np.array(s.dvl_z_msgs)) )
+            },
+        "modem_az" : 
+            {
+                "bias" : float( np.mean( np.array(s.azimuth_msgs) ) - expected_azimuth_deg ),
+                "var" : float( np.var( np.array(s.azimuth_msgs)) )
+            },
+        "modem_range" : 
+            {
+                "bias" : float( np.mean( np.array(s.range_msgs) ) - expected_range ),
+                "var" : float( np.var( np.array(s.range_msgs)) )
+            }
+        }
+except Exception as exc:
+    print("Missed messages. Unable to write file")
+    import sys
+    sys.exit(-1)
+
+with open('config.yaml', 'w') as file:
+    documents = yaml.dump({"mission_config" : yaml_obj}, file)
+
+print() # Empty line
 
 ## Baro
 data = np.array(s.baro_msgs)
@@ -240,8 +285,8 @@ print("Accel z\t\tbias: {}\tstd: {}\tvar:{}\t({})".format(mean, std, var, num))
 ## Modem Range
 data = np.array(s.range_msgs)
 num = len(data)
-mean = round(np.mean(data),3)
-bias = mean - expected_range
+mean = np.mean(data)
+bias = round( mean - expected_range, 3)
 std = round(np.std(data),3)
 var = round(np.var(data),3)
 print("Modem range\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num))
@@ -249,8 +294,8 @@ print("Modem range\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num)
 ## Modem Azimuth
 data = np.array(s.azimuth_msgs)
 num = len(data)
-mean = round(np.mean(data),3)
-bias = mean - expected_azimuth_deg
+mean = np.mean(data)
+bias = round( mean - expected_azimuth_deg, 3)
 std = round(np.std(data),3)
 var = round(np.var(data),3)
 print("Modem azimuth\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num))

@@ -26,7 +26,7 @@ RANGE_BIAS = 0.65
 AZIMUTH_SD = 15
 AZIMUTH_BIAS = -45
 
-GLOBAL_POSE = [0,0,0,0]
+GLOBAL_POSE = [0,0,-0.2,0]
 
 NUM_BYTES = 32
 COMPRESSION = False
@@ -36,6 +36,9 @@ class SeatracSnub:
     def __init__(self, robot_names):
         self.poses = {}
         self.poses["topside"] = Pose() # Assume topside beacon located (0,0,0)
+        self.poses["topside"].position.x = GLOBAL_POSE[0]
+        self.poses["topside"].position.y = GLOBAL_POSE[1]
+        self.poses["topside"].position.z = GLOBAL_POSE[2]
         self.poses["topside"].orientation.w = 1
         for r in robot_names:
             rospy.Subscriber(r + "/pose_gt", Odometry, callback = self.pose_callback, callback_args = r)
