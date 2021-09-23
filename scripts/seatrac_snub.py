@@ -124,7 +124,7 @@ if __name__ == "__main__":
                 # diff_x, diff_y = diff_y, diff_x # transform to NED in gazebo
                 # az_sd = ( 15*np.random.uniform() + 30 ) * (np.pi/180)
                 ang = np.arctan2(diff_y, diff_x) #+ np.random.normal(0, az_sd)
-                ang_deg = np.rad2deg(ang) + np.random.normal(0, AZIMUTH_SD) + AZIMUTH_BIAS
+                ang_deg = np.rad2deg(ang) + np.random.normal(0, AZIMUTH_SD) - AZIMUTH_BIAS
                 az_meas = Measurement("modem_azimuth", t, action_executed_by, measured_asset, ang_deg, AZIMUTH_SD**2, GLOBAL_POSE, -1.0)
                 topside_meas_pkg.measurements.append(az_meas)
             else:

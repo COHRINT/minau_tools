@@ -155,7 +155,7 @@ try:
             },
         "modem_az" : 
             {
-                "bias" : float( np.mean( np.array(s.azimuth_msgs) ) - expected_azimuth_deg ),
+                "bias" : float( np.mean( expected_azimuth_deg - np.array(s.azimuth_msgs) ) ),
                 "var" : float( np.var( np.array(s.azimuth_msgs)) )
             },
         "modem_range" : 
