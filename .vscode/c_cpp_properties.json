@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/lukez/minau/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/lukez/minau/src/bno055_usb_stick/include/**",
+        "/home/lukez/minau/src/darknet_ros/darknet_ros/include/**",
+        "/home/lukez/minau/src/uuv_simulator/uuv_gazebo_plugins/uuv_gazebo_plugins/include/**",
+        "/home/lukez/minau/src/uuv_simulator/uuv_gazebo_plugins/uuv_gazebo_ros_plugins/include/**",
+        "/home/lukez/minau/src/uuv_simulator/uuv_sensor_plugins/uuv_sensor_ros_plugins/include/**",
+        "/home/lukez/minau/src/uuv_simulator/uuv_world_plugins/uuv_world_plugins/include/**",
+        "/home/lukez/minau/src/uuv_simulator/uuv_world_plugins/uuv_world_ros_plugins/include/**",
+        "/home/lukez/minau/src/wit_motion_imu_ros/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}
