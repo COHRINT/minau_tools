@@ -23,11 +23,13 @@ class Rviz_Waypoint:
 	def click_callback(self, msg):
 
 		# TODO: msg comes in in ENU, NEED TO CHANGE TO NED before we publish it
-
+		print("waypoint recieved")
 		goal = NavigateToActionGoal()
 		goal.header.stamp = rospy.get_rostime()
 		goal.goal.arrival_radius = 0.5
-		goal.goal.destination_position = msg.pose.position
+		goal.goal.destination_position.x = msg.pose.position.y
+		goal.goal.destination_position.y = msg.pose.position.x
+		goal.goal.destination_position.z = 0.5
 		goal.goal.desired_heading = HEADING
 
 		self.waypoint_publisher.publish(goal)
