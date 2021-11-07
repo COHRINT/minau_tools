@@ -6,7 +6,7 @@ from geometry_msgs.msg import PoseStamped
 
 
 
-ASSET_NAME = "bluerov2_4"
+ASSET_NAME = "bluerov2_7"
 HEADING = 0.0
 
 
@@ -29,7 +29,7 @@ class Rviz_Waypoint:
 		goal.goal.arrival_radius = 0.5
 		goal.goal.destination_position.x = msg.pose.position.y
 		goal.goal.destination_position.y = msg.pose.position.x
-		goal.goal.destination_position.z = 0.5
+		goal.goal.destination_position.z = 0.2
 		goal.goal.desired_heading = HEADING
 
 		self.waypoint_publisher.publish(goal)

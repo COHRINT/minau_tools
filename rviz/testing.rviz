@@ -33,8 +33,8 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Odometry1
         - /Odometry1/Shape1
-        - /Odometry2
         - /RobotModel2
         - /Image1
       Splitter Ratio: 0.5
@@ -81,7 +81,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: false
-      Enabled: false
+      Enabled: true
       Keep: 1
       Name: Odometry
       Position Tolerance: 0.10000000149011612
@@ -92,12 +92,12 @@ Visualization Manager:
         Color: 138; 226; 52
         Head Length: 0.20000000298023224
         Head Radius: 0.15000000596046448
-        Shaft Length: 0
-        Shaft Radius: 0
+        Shaft Length: 1
+        Shaft Radius: 0.10000000149011612
         Value: Arrow
-      Topic: /sonar_odom
+      Topic: /bluerov2_7/odometry/filtered/odom
       Unreliable: false
-      Value: false
+      Value: true
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -253,25 +253,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.295252323150635
+      Distance: 8.877091407775879
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.931464672088623
-        Y: 2.02984619140625
-        Z: 2.550839900970459
+        X: 5.118635654449463
+        Y: 0.627810537815094
+        Z: 3.2387282848358154
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.914797306060791
+      Pitch: 1.024796724319458
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.7985620498657227
+      Yaw: 4.348566055297852
     Saved:
       - Class: rviz/Orbit
         Distance: 15.316048622131348
