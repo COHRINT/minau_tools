@@ -128,6 +128,16 @@ print("Jump on the surface modem a few times to simulate waves\n")
 s = Subber(args.name)
 rospy.sleep(args.time)
 
+modem_range_bias = 0.0
+modem_range_var = 0.0
+modem_az_bias = 0.0
+modem_az_var = 0.0
+if len(s.range_msgs) != 0:
+    modem_range_bias = float( np.mean( np.array(s.range_msgs) ) - expected_range )
+    modem_range_var = float( np.var( np.array(s.range_msgs)) )
+    modem_az_bias = float( np.mean( expected_azimuth_deg - np.array(s.azimuth_msgs) ) )
+    modem_az_var = float( np.var( np.array(s.azimuth_msgs)) )
+
 # Produce the yaml file
 try:
     yaml_obj = {
@@ -155,13 +165,13 @@ try:
             },
         "modem_az" : 
             {
-                "bias" : float( np.mean( expected_azimuth_deg - np.array(s.azimuth_msgs) ) ),
-                "var" : float( np.var( np.array(s.azimuth_msgs)) )
+                "bias" : modem_az_bias,
+                "var" : modem_az_var
             },
         "modem_range" : 
             {
-                "bias" : float( np.mean( np.array(s.range_msgs) ) - expected_range ),
-                "var" : float( np.var( np.array(s.range_msgs)) )
+                "bias" : modem_range_bias,
+                "var" : modem_range_var
             }
         }
 except Exception as exc:
@@ -283,19 +293,22 @@ print("Accel z\t\tbias: {}\tstd: {}\tvar:{}\t({})".format(mean, std, var, num))
 # print("*"*10 + "\n") 
 
 ## Modem Range
-data = np.array(s.range_msgs)
-num = len(data)
-mean = np.mean(data)
-bias = round( mean - expected_range, 3)
-std = round(np.std(data),3)
-var = round(np.var(data),3)
-print("Modem range\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num))
+if len(s.range_msgs) != 0:
+    data = np.array(s.range_msgs)
+    num = len(data)
+    mean = np.mean(data)
+    bias = round( mean - expected_range, 3)
+    std = round(np.std(data),3)
+    var = round(np.var(data),3)
+    print("Modem range\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num))
 
-## Modem Azimuth
-data = np.array(s.azimuth_msgs)
-num = len(data)
-mean = np.mean(data)
-bias = round( expected_azimuth_deg - mean, 3)
-std = round(np.std(data),3)
-var = round(np.var(data),3)
-print("Modem azimuth\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num))
+    ## Modem Azimuth
+    data = np.array(s.azimuth_msgs)
+    num = len(data)
+    mean = np.mean(data)
+    bias = round( expected_azimuth_deg - mean, 3)
+    std = round(np.std(data),3)
+    var = round(np.var(data),3)
+    print("Modem azimuth\tbias: {}\tstd: {}\tvar:{}\t({})".format(bias, std, var, num))
+else:
+    print("No modem measurements received")
