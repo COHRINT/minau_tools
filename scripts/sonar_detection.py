@@ -102,7 +102,7 @@ class Visualizer:
 		# Plot and publish data
 		if self.first_angle - converted_angle >= self.num_gradians:
 			self.plot_publish_data()
-			self.first_angle -= int(self.num_gradians/2.0)
+			self.first_angle -= int(self.num_gradians)
 		
 		
 		# Pop off from queue and push new data on
