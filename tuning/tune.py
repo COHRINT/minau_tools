@@ -57,14 +57,13 @@ class Subber:
 
     def baro_callback(self, msg):
         self.baro_msgs.append( msg.data )
+        msgs = " baro {}| dvl {}| compass {}| modem {}".format(len(self.baro_msgs), len(self.dvl_x_msgs), len(self.compass_roll_msgs), len(self.range_msgs))
+        self.cuprint(msgs, print_prev_line=True)
 
     def dvl_callback(self, msg):
         self.dvl_x_msgs.append( msg.twist.twist.linear.x )
         self.dvl_y_msgs.append( msg.twist.twist.linear.y )
         self.dvl_z_msgs.append( msg.twist.twist.linear.z )
-
-        msgs = " baro {}| dvl {}| compass {}| modem {}".format(len(self.baro_msgs), len(self.dvl_x_msgs), len(self.compass_roll_msgs), len(self.range_msgs))
-        self.cuprint(msgs, print_prev_line=True)
 
     def compass_callback(self, msg):
 
