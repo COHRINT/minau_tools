@@ -1,0 +1,18 @@
+<launch>
+
+	<node pkg="tf" type="static_transform_publisher" name="pool_tf" args="0 0 0 0 0 0 1 odom pool 100" />
+	<node pkg="tf" type="static_transform_publisher" name="pool_ladder_tf" args="0 0 0 0 0 0 1 pool pool_ladder 100" />
+	<node pkg="minau_tools" type="topside_visualizer.py" name="topside_visualizer" ns="bluerov2_7"/>
+
+
+	<arg name="pool_model" default="$(find minau_tools)/urdf/pool.urdf"/>
+  	<param name="pool_description" command="$(find xacro)/xacro.py $(arg pool_model)" />
+
+	<arg name="bruce_model" default="$(find minau_tools)/urdf/bruce.urdf"/>
+  	<param name="own_description" command="$(find xacro)/xacro.py $(arg bruce_model)" />
+
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find minau_tools)/rviz/testing.rviz" />
+	<node type="rviz_waypoint_drag.py" name="rviz_wpt" pkg="minau_tools"/>
+
+
+</launch>
