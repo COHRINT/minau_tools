@@ -31,7 +31,7 @@ class Subber:
     def __init__(self, name):
         rospy.Subscriber("{}/mavros/global_position/rel_alt".format(name), Float64, self.baro_callback)
         rospy.Subscriber("{}/dvl".format(name), TwistWithCovarianceStamped, self.dvl_callback)
-        rospy.Subscriber("{}/imu/data".format(name), Imu, self.compass_callback)
+        rospy.Subscriber("{}/imu/data_raw".format(name), Imu, self.compass_callback)
         rospy.Subscriber("{}/etddf/packages_in".format(name), MeasurementPackage, self.modem_callback)
         self.cuprint = CUPrint("tuner")
 
