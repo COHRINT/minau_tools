@@ -26,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Image
+    SyncSource: ""
   - Class: rviz/Displays
     Help Height: 70
     Name: Displays
@@ -95,7 +95,7 @@ Visualization Manager:
         Shaft Length: 1
         Shaft Radius: 0.10000000149011612
         Value: Arrow
-      Topic: /bluerov2_7/odometry/filtered/odom
+      Topic: /bluerov2_5/odometry/filtered/odom
       Unreliable: false
       Value: true
     - Angle Tolerance: 0.10000000149011612

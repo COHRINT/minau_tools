@@ -7,7 +7,7 @@ from geometry_msgs.msg import PoseStamped
 
 
 ASSET_NAME = "bluerov2_7"
-HEADING = 0.0
+HEADING = 90.0
 
 
 
@@ -16,7 +16,7 @@ HEADING = 0.0
 class Rviz_Waypoint:
 	def __init__(self):
 
-		self.waypoint_publisher = rospy.Publisher("/{asset}/uuv_control/navigate_to/goal".format(asset = ASSET_NAME), NavigateToActionGoal, queue_size=10)
+		self.waypoint_publisher = rospy.Publisher("uuv_control/navigate_to/goal", NavigateToActionGoal, queue_size=10)
 
 		rospy.Subscriber("/move_base_simple/goal", PoseStamped, callback=self.click_callback)
 
@@ -26,10 +26,11 @@ class Rviz_Waypoint:
 		print("waypoint recieved")
 		goal = NavigateToActionGoal()
 		goal.header.stamp = rospy.get_rostime()
-		goal.goal.arrival_radius = 0.5
+		goal.goal.arrival_radius = 0.0
 		goal.goal.destination_position.x = msg.pose.position.y
 		goal.goal.destination_position.y = msg.pose.position.x
-		goal.goal.destination_position.z = 0.2
+		goal.goal.destination_position.z = 0.3
+		goal.goal.release_at_target = True
 		goal.goal.desired_heading = HEADING
 
 		self.waypoint_publisher.publish(goal)

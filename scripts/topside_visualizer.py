@@ -22,7 +22,7 @@ def grad_to_rad(grads):
 
 class Visualizer:
 	def __init__(self):
-		self.image_pub = rospy.Publisher("/ping360_node/sonar/image",Image,queue_size=10)
+		self.image_pub = rospy.Publisher("/ping360_node/sonar/image1",Image,queue_size=10)
 		self.range = None
 
 		self.count = 0
