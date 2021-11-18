@@ -109,11 +109,11 @@ args = parser.parse_args()
 # Truth (expected) + bias = measured --> bias = measured - truth
 # Truth = measured - bias
 
-modem_pose = [0,0, args.depth, 0] # [m, m, m, rad]
+modem_pose = [0, 0.0, args.depth, 0.0] # [m, m, m, rad]
 vehicle_position = [0,args.y_pos, 0]
-modem_position=np.array(modem_pose)[:-1] # remove the pose
+modem_position= modem_pose[:-1] # remove the pose
 vehicle_position=np.array(vehicle_position)
-delta_position = vehicle_position - modem_position
+delta_position = vehicle_position - np.array(modem_position)
 expected_range = np.linalg.norm( delta_position )
 expected_azimuth_rad = np.arctan2(delta_position[1], delta_position[0]) - modem_pose[-1]
 expected_azimuth_deg = np.degrees(expected_azimuth_rad)
