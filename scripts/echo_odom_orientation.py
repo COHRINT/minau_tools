@@ -12,7 +12,6 @@ def callback(odom):
     print('RPY: ({:0.2f}, {:0.2f}, {:0.2f})'.format(np.degrees(roll), np.degrees(pitch), np.degrees(yaw)))
 
 
-actor = "bluerov2_3"
 rospy.init_node("odom_ori_echo", anonymous=True)
-rospy.Subscriber("{}/odometry/filtered/odom".format(actor), Odometry, callback)
+rospy.Subscriber("odometry/filtered/odom", Odometry, callback)
 rospy.spin()

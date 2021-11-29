@@ -6,8 +6,10 @@ from math import cos, pi, sin
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from minau.msg import SonarTargetList, SonarTarget
+from nav_msgs.msg import Odometry
 import cv2
 import copy
+import tf
 
 GREEN = (0,255,0)
 IMAGE_WIDTH = 500
@@ -20,13 +22,13 @@ def grad_to_rad(grads):
 
 class Visualizer:
 	def __init__(self):
-		self.image_pub = rospy.Publisher("ping360_node/sonar/image",Image,queue_size=10)
+		self.image_pub = rospy.Publisher("/ping360_node/sonar/image",Image,queue_size=10)
 		self.range = None
 
 		self.count = 0
 
-		rospy.Subscriber("ping360_node/sonar/data",SonarEcho,self.data_callback)
-		rospy.Subscriber("sonar_processing/target_list",SonarTargetList,self.detection_callback)
+		rospy.Subscriber("/ping360_node/sonar/data",SonarEcho,self.data_callback)
+		rospy.Subscriber("/sonar_processing/target_list",SonarTargetList,self.detection_callback)
 		self.image = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), np.uint8) * 255
 		self.cache = copy.deepcopy(self.image)
 		self.bridge = CvBridge()
@@ -98,11 +100,55 @@ class Visualizer:
 	def publishImage(self):
 		self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.image, "rgb8"))
 
+class SonarScanRviz:
+	def __init__(self):
+		rospy.Subscriber("/ping360_node/sonar/data",SonarEcho,self.data_callback)
+		rospy.Subscriber("odometry/filtered/odom", Odometry, self.pose_callback)
+		self.sonar_odom_pub = rospy.Publisher("/sonar_odom", Odometry, queue_size=10)
+
+		self.position = None
+		self.curr_yaw = None
+
+	def data_callback(self, msg):
+		if self.position is None or self.curr_yaw is None:
+			return
+
+		rad_angle = grad_to_rad(msg.angle + 200)
+
+		tot_angle = self.curr_yaw + rad_angle
+
+		while tot_angle > np.pi:
+			tot_angle -= 2 * np.pi
+		
+		while tot_angle < -np.pi:
+			tot_angle += 2 * np.pi
+
+		o = Odometry()
+		o.header.frame_id = "odom"
+		o.header.stamp = rospy.get_rostime()
+		o.pose.pose.position = self.position
+
+		quat_angle = tf.transformations.quaternion_from_euler(0, 0, tot_angle)
+		o.pose.pose.orientation.x = quat_angle[0]
+		o.pose.pose.orientation.y = quat_angle[1]
+		o.pose.pose.orientation.z = quat_angle[2]
+		o.pose.pose.orientation.w = quat_angle[3]
+
+		self.sonar_odom_pub.publish(o)
+
+	def pose_callback(self, msg):
+		self.position = msg.pose.pose.position
+		ang = msg.pose.pose.orientation
+		(_, _, self.curr_yaw) = tf.transformations.euler_from_quaternion([ang.x, ang.y, ang.z, ang.w])
+
+
+
 
 
 if __name__ == "__main__":
 	rospy.init_node("sonar_visualizer")
 	Visualizer()
+	SonarScanRviz()
 	rate = rospy.Rate(1)
 	while not rospy.is_shutdown():
 		rate.sleep()

@@ -27,8 +27,8 @@ MEASURED_NAME = "bruce"
 ASSET_NAME = "squirt"
 MEASURED_NAME = "squirt"
 
-# ASSET_NAME = "guppy"
-# MEASURED_NAME = "guppy"
+ASSET_NAME = "guppy"
+MEASURED_NAME = "guppy"
 
 # ASSET_NAME = "bubbles"
 # MEASURED_NAME = "bubbles"

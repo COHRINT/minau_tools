@@ -102,7 +102,7 @@ class Visualizer:
 		# Plot and publish data
 		if self.first_angle - converted_angle >= self.num_gradians:
 			self.plot_publish_data()
-			self.first_angle -= int(self.num_gradians/2.0)
+			self.first_angle -= int(self.num_gradians)
 		
 		
 		# Pop off from queue and push new data on
@@ -197,8 +197,8 @@ class DetectionRePublisher:
 
 if __name__ == "__main__":
 	rospy.init_node("cropped_sonar_visualizer")
-	Visualizer(NUM_GRAD, SCAN_IMAGE_ROWS)
-	DetectionRePublisher(NUM_GRAD, SCAN_IMAGE_ROWS)
+	Visualizer(NUM_GRAD, 1)
+	# DetectionRePublisher(NUM_GRAD, SCAN_IMAGE_ROWS)
 	rospy.spin()
 	rate = rospy.Rate(1)
 	while not rospy.is_shutdown():
