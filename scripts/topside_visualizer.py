@@ -12,6 +12,7 @@ import copy
 import tf
 
 GREEN = (0,255,0)
+RED = (255,0,0)
 IMAGE_WIDTH = 500
 IMAGE_HEIGHT = 500
 
@@ -22,13 +23,13 @@ def grad_to_rad(grads):
 
 class Visualizer:
 	def __init__(self):
-		self.image_pub = rospy.Publisher("/ping360_node/sonar/image",Image,queue_size=10)
+		self.image_pub = rospy.Publisher("ping360_node/sonar/image1",Image,queue_size=10)
 		self.range = None
 
 		self.count = 0
 
-		rospy.Subscriber("/ping360_node/sonar/data",SonarEcho,self.data_callback)
-		rospy.Subscriber("/sonar_processing/target_list",SonarTargetList,self.detection_callback)
+		rospy.Subscriber("ping360_node/sonar/data",SonarEcho,self.data_callback)
+		rospy.Subscriber("sonar_processing/target_list",SonarTargetList,self.detection_callback)
 		self.image = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), np.uint8) * 255
 		self.cache = copy.deepcopy(self.image)
 		self.bridge = CvBridge()
@@ -70,18 +71,30 @@ class Visualizer:
 					pointColor = data[int(i * linear_factor - 1)]
 				else:
 					pointColor = 0
+
 				for k in np.linspace(0, step, 8 * step):
 					theta = grad_to_rad(angle + k)
+					# theta_red = grad_to_rad(angle + k - 1)
 					# if convertToEnu:
 					# 	theta = ned_to_enu(theta)
 					x = float(i) * cos(theta)
 					y = float(i) * sin(theta)
+					
+
+					# x_red = float(i) * cos(theta_red)
+					# y_red = float(i) * sin(theta_red)
 					self.image[int(center[0] + x)][int(center[1] + y)
 												][0] = pointColor
 					self.image[int(center[0] + x)][int(center[1] + y)
 												][1] = pointColor
 					self.image[int(center[0] + x)][int(center[1] + y)
 												][2] = 0
+					# self.image[int(center[0] + x_red)][int(center[1] + y_red)
+					# 							][0] = 255
+					# self.image[int(center[0] + x_red)][int(center[1] + y_red)
+					# 							][1] = 0
+					# self.image[int(center[0] + x_red)][int(center[1] + y_red)
+					# 							][2] = 0
 
 					self.cache[int(center[0] + x)][int(center[1] + y)
 												][0] = pointColor
@@ -89,11 +102,24 @@ class Visualizer:
 												][1] = pointColor
 					self.cache[int(center[0] + x)][int(center[1] + y)
 												][2] = 0
+					# self.cache[int(center[0] + x_red)][int(center[1] + y_red)
+					# 							][0] = 255
+					# self.cache[int(center[0] + x_red)][int(center[1] + y_red)
+					# 							][1] = 0
+					# self.cache[int(center[0] + x_red)][int(center[1] + y_red)
+					# 							][2] = 0
 					
 		except IndexError:
 			rospy.logwarn(
 				"IndexError: data response was empty, skipping this iteration..")
 			
+		i = int(center[0] - 4)
+		k = np.linspace(0, step, 8 * step)[4*step]
+		theta = grad_to_rad(angle + k - step)
+		x = int(center[0] + float(i) * cos(theta))
+		y = int(center[1] + float(i) * sin(theta))
+		cv2.circle(self.image, (y,x), 4, RED, -1)
+		# cv2.rectangle(self.image,(y - 1, x - 1), (y + 1, x + 1), RED)
 
 		self.publishImage()
 
