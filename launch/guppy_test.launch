@@ -11,7 +11,7 @@
 	<arg name="guppy_model" default="$(find minau_tools)/urdf/guppy.urdf"/>
   	<param name="own_description" command="$(find xacro)/xacro.py $(arg guppy_model)" />
 
-	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find minau_tools)/rviz/testing.rviz" />
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find minau_tools)/rviz/guppy_testing.rviz" />
 	<node type="rviz_waypoint_drag.py" name="rviz_wpt" pkg="minau_tools" ns="bluerov2_5"/>
 
 

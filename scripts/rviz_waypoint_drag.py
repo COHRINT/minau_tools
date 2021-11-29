@@ -29,8 +29,8 @@ class Rviz_Waypoint:
 		goal.goal.arrival_radius = 0.0
 		goal.goal.destination_position.x = msg.pose.position.y
 		goal.goal.destination_position.y = msg.pose.position.x
-		goal.goal.destination_position.z = 0.3
-		goal.goal.release_at_target = True
+		goal.goal.destination_position.z = 0.7
+		goal.goal.release_at_target = False
 		goal.goal.desired_heading = HEADING
 
 		self.waypoint_publisher.publish(goal)
