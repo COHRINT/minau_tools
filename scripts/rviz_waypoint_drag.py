@@ -1,28 +1,24 @@
 #!/usr/bin/env python
+'''
+	This allows you to click on points in rviz and have robot go there
+'''
 
 import rospy
 from minau.msg import NavigateToActionGoal
 from geometry_msgs.msg import PoseStamped
 
 
-
-ASSET_NAME = "bluerov2_7"
 HEADING = 90.0
-
-
-
-
 
 class Rviz_Waypoint:
 	def __init__(self):
 
 		self.waypoint_publisher = rospy.Publisher("uuv_control/navigate_to/goal", NavigateToActionGoal, queue_size=10)
-
+		# this is the topic that rviz publishes to
 		rospy.Subscriber("/move_base_simple/goal", PoseStamped, callback=self.click_callback)
 
 	def click_callback(self, msg):
-
-		# TODO: msg comes in in ENU, NEED TO CHANGE TO NED before we publish it
+		# publish waypoint with location that was clicked on rviz
 		print("waypoint recieved")
 		goal = NavigateToActionGoal()
 		goal.header.stamp = rospy.get_rostime()
